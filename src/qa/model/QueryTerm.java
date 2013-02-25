@@ -6,4 +6,5 @@ package qa.model;
  */
 public interface QueryTerm {
 
+	String getText();
 }
