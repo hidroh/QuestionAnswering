@@ -8,19 +8,29 @@ import java.util.Set;
 
 import qa.model.enumerator.QueryType;
 
-public class ClassifierTrainingInfoImpl implements ClassifierTrainingInfo, Serializable {
-	private Set<QueryTerm> vocabulary;
+@SuppressWarnings("serial")
+public class ClassifierTrainingInfoImpl implements ClassifierTrainingInfo,
+		Serializable {
+	private Set<String> vocabulary;
 	private Map<QueryType, Double> prior;
-	private Map<QueryTerm, Map<QueryType, Double>> condProb;
-	
+	private Map<String, Map<QueryType, Double>> condProb;
+
 	public ClassifierTrainingInfoImpl() {
-		vocabulary = new HashSet<QueryTerm>();
+		vocabulary = new HashSet<String>();
 		prior = new HashMap<QueryType, Double>();
-		condProb = new HashMap<QueryTerm, Map<QueryType, Double>>();
+		condProb = new HashMap<String, Map<QueryType, Double>>();
 	}
-	
+
+	public ClassifierTrainingInfoImpl(Set<String> vocabulary,
+			Map<QueryType, Double> prior,
+			Map<String, Map<QueryType, Double>> condProb) {
+		this.vocabulary = vocabulary;
+		this.prior = prior;
+		this.condProb = condProb;
+	}
+
 	@Override
-	public Set<QueryTerm> getVocabulary() {
+	public Set<String> getVocabulary() {
 		return vocabulary;
 	}
 
@@ -30,40 +40,36 @@ public class ClassifierTrainingInfoImpl implements ClassifierTrainingInfo, Seria
 	}
 
 	@Override
-	public Map<QueryTerm, Map<QueryType, Double>> getConditionalProbability() {
+	public Map<String, Map<QueryType, Double>> getConditionalProbability() {
 		return condProb;
 	}
 
 	public String toString() {
-		// short version
-		String str = "[Training info]\n";
-		str += String.format("- vocabulary [%d]\n", vocabulary.size());
+		String str = "\nTraining info\n";
+		str += String.format("- vocabulary = %d\n", vocabulary.size());
 		str += "- prior:\n";
 		for (QueryType pk : prior.keySet()) {
-			str += pk.toString() + ": " + prior.get(pk) + "; ";
+			str += String.format("%-5s: %.2f\n", pk.toString(), prior.get(pk));
 		}
-		str += "\n";
 
-		// String str = "[Training info]\n";
-		// String vStr = "";
-		// for (QueryTerm v : vocabulary) {
-		// 	vStr += v.getText() + ", ";
-		// }
-		// str += "- vocabulary = {" + vStr + "}\n";
-		// str += "- prior:\n";
-		// for (QueryType pk : prior.keySet()) {
-		// 	str += pk.toString() + ": " + prior.get(pk) + "; ";
-		// }
-		// str += "\n";
+		str += "- log conditional probability:\n";
+		int count = 0;
+		for (String t : condProb.keySet()) {
+			if (count < 20) {
+				str += String.format("%-20s [ ", t);
+				for (QueryType c : condProb.get(t).keySet()) {
+					str += String.format("%-5s: %.2f, ", c.toString(),
+							Math.log(condProb.get(t).get(c)));
+				}
+				str += " ]\n";
 
-		// str += "- conditional probability:\n";
-		// for (QueryTerm ck : condProb.keySet()) {
-		// 	for (QueryType pk : condProb.get(ck).keySet()) {sum += condProb.get(ck).get(pk);
-		// 		str += ck.getText() + "," + pk.toString() + ": " + condProb.get(ck).get(pk) + "; ";
-		// 	}
-		// }
-		// str += "\n";
-		
+				count++;
+			} else {
+				str += "...\n";
+				break;
+			}
+		}
+
 		return str;
 	}
 

@@ -6,9 +6,9 @@ import java.util.Set;
 import qa.model.enumerator.QueryType;
 
 public interface ClassifierTrainingInfo {
-	Set<QueryTerm> getVocabulary();
+	Set<String> getVocabulary();
 
 	Map<QueryType, Double> getPrior();
 
-	Map<QueryTerm, Map<QueryType, Double>> getConditionalProbability();
+	Map<String, Map<QueryType, Double>> getConditionalProbability();
 }

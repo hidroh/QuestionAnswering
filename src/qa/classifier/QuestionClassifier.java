@@ -1,4 +1,4 @@
-package qa.parser.classifier;
+package qa.classifier;
 
 import java.util.List;
 

@@ -1,12 +1,14 @@
 package qa.helper;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,29 +48,38 @@ public class QuestionClassifierHelper {
 		File folder = new File(corpusPath);
 		File[] fileList = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(Application.Settings.getProperty("CLASSIFIER_TRAINING_EXT").toLowerCase()) &&
-					name.toLowerCase().startsWith(Application.Settings.getProperty("CLASSIFIER_TRAINING_PREFIX").toLowerCase());
+				return name.toLowerCase().endsWith(
+						Application.Settings.getProperty(
+								"CLASSIFIER_TRAINING_EXT").toLowerCase())
+						&& name.toLowerCase().startsWith(
+								Application.Settings.getProperty(
+										"CLASSIFIER_TRAINING_PREFIX")
+										.toLowerCase());
 			}
 		});
 		for (File file : fileList) {
 			int questionCount = 0;
-			Scanner scanner;
+			BufferedReader br = null;
 			try {
-				scanner = new Scanner(file);
-				while (scanner.hasNextLine()) {
+				String line;
+				br = new BufferedReader(new FileReader(file));
+				while ((line = br.readLine()) != null) {
 					questionCount++;
-					String line = scanner.nextLine();
 					trainingData.add(getQuestionInfo(line));
 				}
 
-				System.out.println(String.format("Training set: %s [ %d questions]", file.getName(), questionCount));
+				System.out.printf("Training set: %s [ %d questions]\n",
+						file.getName(), questionCount);
 			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 		}
-		
+
 		return trainingData;
 	}
 
@@ -76,10 +87,11 @@ public class QuestionClassifierHelper {
 		Matcher m = p.matcher(text);
 		if (m.find()) {
 			String queryType = m.group(1);
-//			String subQueryType = m.group(2);
+			// String subQueryType = m.group(2);
 			String rawQuestion = m.group(3);
 			List<QueryTerm> terms = getQueryTerms(rawQuestion);
-			QuestionInfo questionInfo = new QuestionInfoImpl(QueryType.valueOf(queryType), terms);
+			QuestionInfo questionInfo = new QuestionInfoImpl(
+					QueryType.valueOf(queryType), terms);
 			// System.out.println(questionInfo);
 			return questionInfo;
 		} else {
@@ -89,13 +101,13 @@ public class QuestionClassifierHelper {
 
 	public List<QueryTerm> getQueryTerms(String text) {
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
-		Pattern wordPattern = Pattern.compile("\\w+",
-				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Pattern wordPattern = Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE
+				| Pattern.DOTALL);
 		Matcher m = wordPattern.matcher(text);
 		while (m.find()) {
 			terms.add(new QueryTermImpl(m.group()));
 		}
-		
+
 		return terms;
 	}
 
