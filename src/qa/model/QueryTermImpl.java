@@ -1,6 +1,8 @@
 package qa.model;
 
-public class QueryTermImpl implements QueryTerm {
+import java.io.Serializable;
+
+public class QueryTermImpl implements QueryTerm, Serializable {
 	private String text;
 	
 	public QueryTermImpl(String text) {

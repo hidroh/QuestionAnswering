@@ -1,7 +1,16 @@
 package qa;
 
+import java.io.File;
+import java.lang.ClassNotFoundException;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import qa.extractor.AnswerExtractor;
 import qa.factory.AnswerExtractorFactory;
@@ -33,22 +42,16 @@ import qa.search.SearchEngine;
 
 public class Application {
 
-	/**
-	 * Path to root folder of data set
-	 */
-	private static final String DOCUMENT_PATH = null;
+	public static Properties Settings;
 
 	/**
 	 * @param args array of input questions
 	 */
 	public static void main(String[] args) {
-		QuestionClassifierHelper helper = QuestionClassifierHelper.getInstance();
-		List<QuestionInfo> trainingData = helper.getTrainingData("/Users/hadt/Dropbox/CS5246 Text Processing on the Web/qc/");
-		QuestionClassifier qc = new QuestionClassifierImpl();
-		ClassifierTrainingInfo trainingInfo = qc.train(helper.getAllQueryTypes(), trainingData);
-		System.out.println("Training all done!");
-		System.out.println(trainingInfo);
-		
+		loadProperties();
+		generateClassifierTrainingInfo();
+		ClassifierTrainingInfo trainingInfo = loadClassifierTrainingInfo();
+
 //		// use factory pattern to create components so that we can easily
 //		// swap their underlying implementations later without changing
 //		// this code
@@ -123,7 +126,7 @@ public class Application {
 	 * @param question question to be answered
 	 * @param results list of answer with its supporting document
 	 */
-	public static void printResults(String question, List<ResultInfo> results) {
+	private static void printResults(String question, List<ResultInfo> results) {
 		System.out.println(String.format("Results for question \"%s\"", question));
 		for (ResultInfo resultInfo : results) {
 			System.out.println(String.format("[%s] %s", 
@@ -132,4 +135,61 @@ public class Application {
 		}
 	}
 
+	private static void generateClassifierTrainingInfo() {
+		QuestionClassifierHelper helper = QuestionClassifierHelper.getInstance();
+		List<QuestionInfo> trainingData = helper.getTrainingData(Application.Settings.getProperty("CORPUS_PATH"));
+		QuestionClassifier qc = new QuestionClassifierImpl();
+		ClassifierTrainingInfo trainingInfo = qc.train(helper.getAllQueryTypes(), trainingData);
+
+		try {
+			File classifierOutput = new File(Application.Settings.getProperty("CLASSIFIER_PATH"));
+			if (!classifierOutput.isFile()) {
+				classifierOutput.createNewFile();
+			}
+
+			FileOutputStream f_out = new  FileOutputStream(Application.Settings.getProperty("CLASSIFIER_PATH"));
+			ObjectOutputStream obj_out = new ObjectOutputStream (f_out);
+			obj_out.writeObject (trainingInfo);
+		} catch (FileNotFoundException fnfe) {
+
+		} catch (IOException ioe) {
+
+		}
+
+		System.out.println("Training all done!");
+	}
+
+	private static ClassifierTrainingInfo loadClassifierTrainingInfo() {
+		try {
+			FileInputStream f_in = new FileInputStream(Application.Settings.getProperty("CLASSIFIER_PATH"));
+			ObjectInputStream obj_in = new ObjectInputStream (f_in);
+			Object obj = obj_in.readObject();
+			if (obj instanceof ClassifierTrainingInfo)
+			{
+				return (ClassifierTrainingInfo) obj;
+			} 
+		} catch (FileNotFoundException fnfe) {
+
+		} catch (IOException ioe) {
+
+		} catch (ClassNotFoundException cnfe) {
+
+		}
+
+		return null;
+	}
+
+	private static void loadProperties() {
+		String propertiesPath = new File(Application.class.getProtectionDomain().getCodeSource().getLocation().getPath()) + "\\Application.properties";
+		Settings = new Properties();
+		try {
+		  Settings.load(new FileInputStream(propertiesPath));
+		 //  for(String key : Settings.stringPropertyNames()) {
+			//   String value = Settings.getProperty(key);
+			//   System.out.println(key + " => " + value);
+			// }
+		} catch (IOException e) {
+
+		}		
+	}
 }

@@ -23,12 +23,18 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		Map<QueryTerm, Map<QueryType, Double>> condProb = trainingInfo
 				.getConditionalProbability();
 		v.addAll(extractVocabulary(questions));
+		System.out.println(String.format("Training questions = %d, vocabulary count = %d", questions.size(), v.size()));
 		int n = questions.size();
 
+		double test_sum_prior = 0;
 		for (QueryType c : queryTypes) {
+			System.out.println(String.format("c = %s", c.toString()));
 			int sum_t_ct = 0;
 			int n_c = countQuestionsInClass(questions, c);
 			prior.put(c, (double) n_c / n);
+			test_sum_prior += (double) n_c / n;
+			// System.out.println(String.format("prior[%s] = %f", c.toString(), prior.get(c)));
+			double test_sum_condprob = 0;
 			List<QueryTerm> text_c = concatQuestionsInclass(questions, c);
 			for (QueryTerm t : v) {
 				condProb.put(t, new HashMap<QueryType, Double>());
@@ -41,8 +47,14 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 				Map<QueryType, Double> classTermCount = condProb.get(t);
 				condProb.get(t).put(c,
 						(classTermCount.get(c) + 1) / (sum_t_ct + v.size()));
+				// System.out.println(String.format("condprob[%s,%s] = %f", t.getText(), c.toString(), condProb.get(t).get(c)));
+				test_sum_condprob += condProb.get(t).get(c);
 			}
+
+			assert Math.abs(test_sum_condprob - 1) < 0.00001 : String.format("Conditional probabilities given class = '%s' do not sum up to 1", c.toString());
 		}
+
+		assert Math.abs(test_sum_prior - 1) < 0.00001 : "Priors do not sum up to 1";
 
 		return trainingInfo;
 	}

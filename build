@@ -1,0 +1,2 @@
+javac -cp src/ -d bin/ src/qa/Application.java
+ctags -R -f .tags
