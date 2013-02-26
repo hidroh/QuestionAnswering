@@ -87,7 +87,7 @@ public class QuestionClassifierHelper {
 		}
 	}
 
-	private List<QueryTerm> getQueryTerms(String text) {
+	public List<QueryTerm> getQueryTerms(String text) {
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
 		Pattern wordPattern = Pattern.compile("\\w+",
 				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);

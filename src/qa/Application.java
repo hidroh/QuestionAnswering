@@ -49,8 +49,13 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		loadProperties();
-		generateClassifierTrainingInfo();
+		// generateClassifierTrainingInfo();
 		ClassifierTrainingInfo trainingInfo = loadClassifierTrainingInfo();
+		QuestionClassifier qc = new QuestionClassifierImpl();
+		String question = "Who was Galileo ?";
+		QuestionClassifierHelper helper = QuestionClassifierHelper.getInstance();
+		System.out.println(qc.apply(helper.getAllQueryTypes(), trainingInfo, question));
+
 
 //		// use factory pattern to create components so that we can easily
 //		// swap their underlying implementations later without changing

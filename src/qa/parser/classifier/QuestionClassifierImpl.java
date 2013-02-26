@@ -11,6 +11,7 @@ import qa.model.ClassifierTrainingInfoImpl;
 import qa.model.QueryTerm;
 import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
+import qa.helper.QuestionClassifierHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
 
@@ -62,8 +63,23 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	@Override
 	public QueryType apply(List<QueryType> queryTypes,
 			ClassifierTrainingInfo trainingInfo, String question) {
-		// TODO Auto-generated method stub
-		return null;
+		QuestionClassifierHelper helper = QuestionClassifierHelper.getInstance();
+		List<QueryTerm> terms = helper.getQueryTerms(question);
+		Map<QueryType, Double> score = new HashMap<QueryType, Double>();
+		for (QueryType c : queryTypes) {
+			score.put(c, Math.log(trainingInfo.getPrior().get(c)));
+			for (QueryTerm t : terms) {
+				double log_p_t_c = 0;
+				if (trainingInfo.getConditionalProbability().containsKey(t)) {
+					log_p_t_c = Math.log(trainingInfo.getConditionalProbability().get(t).get(c));
+
+				} 
+
+				score.put(c, score.get(c) + log_p_t_c);
+			}
+		}
+
+		return getArgMax(score);
 	}
 
 	private Set<QueryTerm> extractVocabulary(List<QuestionInfo> questions) {
@@ -118,4 +134,18 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return count;
 	}
 
+	private QueryType getArgMax(Map<QueryType, Double> score) {
+		QueryType classifiedType = null;
+		Double maxScore = -100000.0;
+		System.out.println(maxScore);
+		for (QueryType queryType : score.keySet()) {
+			System.out.println(queryType.toString() + "=>" + score.get(queryType));
+			if (score.get(queryType) > maxScore) {
+				maxScore = score.get(queryType);
+				classifiedType = queryType;
+			}
+		}
+
+		return classifiedType;
+	}
 }
