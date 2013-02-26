@@ -151,28 +151,33 @@ public class Application {
 			QuestionClassifierHelper helper = QuestionClassifierHelper
 					.getInstance();
 			System.out.printf("\nQ: \"%s\"\n", question);
-			System.out.printf("Classified as: %s\n",
-					qc.apply(helper.getAllQueryTypes(), trainingInfo,
-							question));
+			System.out
+					.printf("Classified as: %s\n", qc.apply(
+							helper.getAllQueryTypes(), trainingInfo, question));
 
 		}
 	}
 
 	private static void printUsage() {
-		System.out.println("Usage: java Application <options> <questions>");
+		System.out
+				.println("Usage: java Application <options> \"<question1>\" \"<question2>\"... ");
 		System.out.println("where possible options include:");
 		System.out.printf("  %-15s %s\n", "-train",
-				"Only train question classifier");
+				"Only train question classifier, no input questions required");
 		System.out.printf("  %-15s %s\n", "-qc", "Only classifiy questions");
-
+		System.out.println();
+		System.out
+				.println("Run configuration stored in 'bin/Application.properties'");
+		System.out
+				.println("Example: java Application \"Where is Milan ?\" \"Who developed the Macintosh computer ?\" ");
 	}
 
 	private static void printResults(String question, List<ResultInfo> results) {
 		System.out.printf("\nQ: \"%s\"\n", question);
 		System.out.println("A(s):");
 		for (ResultInfo resultInfo : results) {
-			System.out.printf("[%-5s] %s\n", resultInfo
-					.getSupportingDocument().getId(), resultInfo.getAnswer());
+			System.out.printf("[%-5s] %s\n", resultInfo.getSupportingDocument()
+					.getId(), resultInfo.getAnswer());
 		}
 	}
 
