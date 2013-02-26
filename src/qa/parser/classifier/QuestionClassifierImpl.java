@@ -40,7 +40,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 			for (QueryTerm t : v) {
 				Map<QueryType, Double> classTermCount = condProb.get(t);
 				condProb.get(t).put(c,
-						classTermCount.get(c) / (sum_t_ct + v.size()));
+						(classTermCount.get(c) + 1) / (sum_t_ct + v.size()));
 			}
 		}
 

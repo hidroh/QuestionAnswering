@@ -33,4 +33,26 @@ public class ClassifierTrainingInfoImpl implements ClassifierTrainingInfo {
 		return condProb;
 	}
 
+	public String toString() {
+		String str = "[Training info]\n";
+		String vStr = "";
+		for (QueryTerm v : vocabulary) {
+			vStr += v.getText() + ", ";
+		}
+		str += "- vocabulary = {" + vStr + "}\n";
+		str += "- prior:\n";
+		for (QueryType pk : prior.keySet()) {
+			str += pk.toString() + ": " + prior.get(pk) + "\n";
+		}
+		
+		str += "- conditional probability:\n";
+		for (QueryTerm ck : condProb.keySet()) {
+			int sum = 0;
+			for (QueryType pk : condProb.get(ck).keySet()) {sum += condProb.get(ck).get(pk);
+				str += ck.getText() + "," + pk.toString() + ": " + condProb.get(ck).get(pk) + "\n";
+			}System.out.println(sum);
+		}
+		
+		return "";
+	}
 }
