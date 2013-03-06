@@ -237,7 +237,10 @@ public class Application {
 	private static void loadProperties() {
 		String propertiesPath = new File(Application.class
 				.getProtectionDomain().getCodeSource().getLocation().getPath())
-				+ File.separator + "Application.properties";
+				+ File.separator
+				+ ".."
+				+ File.separator
+				+ "Application.properties";
 		Settings = new Properties();
 		try {
 			Settings.load(new FileInputStream(propertiesPath));
