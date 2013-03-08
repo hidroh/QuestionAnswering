@@ -1,13 +1,15 @@
 package qa.classifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import qa.model.ClassifierTrainingInfo;
-import qa.model.ClassifierTrainingInfoImpl;
+import qa.model.ClassifierInfo;
+import qa.model.ClassifierInfoImpl;
 import qa.model.QueryTerm;
 import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
@@ -21,7 +23,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	@Override
-	public ClassifierTrainingInfo train(List<QueryType> queryTypes,
+	public ClassifierInfo train(List<QueryType> queryTypes,
 			List<QuestionInfo> questions) {
 		Set<String> v = new HashSet<String>();
 		Map<QueryType, Double> prior = new HashMap<QueryType, Double>();
@@ -68,14 +70,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		assert Math.abs(test_sum_prior - 1) < 0.00001 : "Priors do not sum up to 1";
-		ClassifierTrainingInfo trainingInfo = new ClassifierTrainingInfoImpl(v,
-				prior, condProb);
+		ClassifierInfo trainingInfo = new ClassifierInfoImpl(v, prior, condProb);
 		return trainingInfo;
 	}
 
 	@Override
 	public QueryType apply(List<QueryType> queryTypes,
-			ClassifierTrainingInfo trainingInfo, String question) {
+			ClassifierInfo trainingInfo, String question) {
 		List<String> terms = extractQueryTerms(trainingInfo.getVocabulary(),
 				question);
 		Map<QueryType, Double> score = new HashMap<QueryType, Double>();
@@ -176,18 +177,45 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	private QueryType getArgMax(Map<QueryType, Double> score) {
-		QueryType classifiedType = null;
-		Double maxScore = Double.NEGATIVE_INFINITY;
-		for (QueryType queryType : score.keySet()) {
-			if (!suppressLog)
-				System.out.printf("  %-5s => %.2f\n", queryType.toString(),
-						score.get(queryType));
-			if (score.get(queryType) > maxScore) {
-				maxScore = score.get(queryType);
-				classifiedType = queryType;
+		List<Map.Entry<QueryType, Double>> scoreList = new ArrayList<Map.Entry<QueryType, Double>>(
+				score.entrySet());
+		Collections.sort(scoreList,
+				new Comparator<Map.Entry<QueryType, Double>>() {
+					public int compare(Map.Entry<QueryType, Double> o1,
+							Map.Entry<QueryType, Double> o2) {
+						return ((Comparable<Double>) o2.getValue())
+								.compareTo(o1.getValue());
+					}
+				});
+
+		if (!suppressLog) {
+			for (Map.Entry<QueryType, Double> e : scoreList) {
+				System.out.printf("  %-5s => %.2f\n", e.getKey(), e.getValue());
 			}
 		}
 
-		return classifiedType;
+		return scoreList.get(0).getKey();
+	}
+
+	private List<QueryType> getArgsMax(Map<QueryType, Double> score, double t, int k) {
+		List<Map.Entry<QueryType, Double>> scoreList = new ArrayList<Map.Entry<QueryType, Double>>(
+				score.entrySet());
+		Collections.sort(scoreList,
+				new Comparator<Map.Entry<QueryType, Double>>() {
+					public int compare(Map.Entry<QueryType, Double> o1,
+							Map.Entry<QueryType, Double> o2) {
+						return ((Comparable<Double>) o2.getValue())
+								.compareTo(o1.getValue());
+					}
+				});
+
+		List<QueryType> results = new ArrayList<QueryType>();
+		double threshold = scoreList.get(0).getValue() / t;
+		for (int i = 0; i < scoreList.size() && i < k && scoreList.get(i).getValue() > threshold; i++) {
+			results.add(scoreList.get(i).getKey());
+			System.out.println(scoreList.get(i).getKey());
+		}
+
+		return results;
 	}
 }

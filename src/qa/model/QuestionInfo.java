@@ -2,6 +2,7 @@ package qa.model;
 
 import java.util.List;
 
+import qa.model.enumerator.QuerySubType;
 import qa.model.enumerator.QueryType;
 
 /**
@@ -20,6 +21,12 @@ public interface QuestionInfo {
 	 * @return query type
 	 */
 	QueryType getQueryType();
+	
+	/**
+	 * Get query sub type of this question 
+	 * @return query sub type
+	 */
+	QuerySubType getQuerySubType();
 
 	String getRaw();
 }

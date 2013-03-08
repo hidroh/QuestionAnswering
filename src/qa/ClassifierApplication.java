@@ -14,7 +14,7 @@ import java.util.Properties;
 import qa.classifier.QuestionClassifier;
 import qa.classifier.QuestionClassifierImpl;
 import qa.helper.ClassifierHelper;
-import qa.model.ClassifierTrainingInfo;
+import qa.model.ClassifierInfo;
 import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
 
@@ -54,7 +54,7 @@ public class ClassifierApplication {
 					ClassifierApplication.Settings.getProperty("TEST_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			ClassifierTrainingInfo trainingInfo = loadClassifier();
+			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
 				for (QuestionInfo question : testData) {
@@ -87,7 +87,7 @@ public class ClassifierApplication {
 			return;
 		}
 
-		ClassifierTrainingInfo trainingInfo = loadClassifier();
+		ClassifierInfo trainingInfo = loadClassifier();
 		if (trainingInfo != null) {
 			boolean SUPPRESS_LOG = false;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
@@ -134,7 +134,7 @@ public class ClassifierApplication {
 									.getProperty("TRAIN_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			ClassifierTrainingInfo trainingInfo = qc.train(
+			ClassifierInfo trainingInfo = qc.train(
 					helper.getAllQueryTypes(), trainingData);
 
 			try {
@@ -164,7 +164,7 @@ public class ClassifierApplication {
 		}
 	}
 
-	private static ClassifierTrainingInfo loadClassifier() {
+	private static ClassifierInfo loadClassifier() {
 		try {
 			FileInputStream f_in = new FileInputStream(
 					ClassifierApplication.Settings
@@ -172,8 +172,8 @@ public class ClassifierApplication {
 			ObjectInputStream obj_in = new ObjectInputStream(f_in);
 			Object obj = obj_in.readObject();
 			obj_in.close();
-			if (obj instanceof ClassifierTrainingInfo) {
-				return (ClassifierTrainingInfo) obj;
+			if (obj instanceof ClassifierInfo) {
+				return (ClassifierInfo) obj;
 			}
 		} catch (FileNotFoundException fnfe) {
 			System.err.println("Unable to find trained data");

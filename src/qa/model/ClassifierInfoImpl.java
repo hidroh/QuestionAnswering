@@ -9,19 +9,19 @@ import java.util.Set;
 import qa.model.enumerator.QueryType;
 
 @SuppressWarnings("serial")
-public class ClassifierTrainingInfoImpl implements ClassifierTrainingInfo,
+public class ClassifierInfoImpl implements ClassifierInfo,
 		Serializable {
 	private Set<String> vocabulary;
 	private Map<QueryType, Double> prior;
 	private Map<String, Map<QueryType, Double>> condProb;
 
-	public ClassifierTrainingInfoImpl() {
+	public ClassifierInfoImpl() {
 		vocabulary = new HashSet<String>();
 		prior = new HashMap<QueryType, Double>();
 		condProb = new HashMap<String, Map<QueryType, Double>>();
 	}
 
-	public ClassifierTrainingInfoImpl(Set<String> vocabulary,
+	public ClassifierInfoImpl(Set<String> vocabulary,
 			Map<QueryType, Double> prior,
 			Map<String, Map<QueryType, Double>> condProb) {
 		this.vocabulary = vocabulary;

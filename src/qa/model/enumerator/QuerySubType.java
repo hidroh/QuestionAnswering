@@ -11,8 +11,8 @@ public enum QuerySubType {
 	ENTY_body,
 	ENTY_color,
 	ENTY_cremat,
-//	ENTY_currency,
-//	ENTY_disease,
+	ENTY_currency,
+	ENTY_dismed,
 	ENTY_event,
 	ENTY_food,
 	ENTY_instru,
@@ -27,6 +27,7 @@ public enum QuerySubType {
 	ENTY_symbol,
 	ENTY_techmeth,
 	ENTY_termeq,
+	ENTY_veh,
 	ENTY_word,
 	HUM_desc,
 	HUM_gr,
@@ -48,6 +49,6 @@ public enum QuerySubType {
 	NUM_perc,
 	NUM_speed,
 	NUM_temp,
-//	NUM_size,
+	NUM_volsize,
 	NUM_weight
 }

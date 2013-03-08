@@ -17,6 +17,7 @@ import qa.model.QueryTermImpl;
 import qa.model.QuestionInfo;
 import qa.model.QuestionInfoImpl;
 import qa.model.enumerator.QueryType;
+import qa.model.enumerator.QuerySubType;
 
 public class ClassifierHelper {
 
@@ -83,11 +84,11 @@ public class ClassifierHelper {
 		Matcher m = p.matcher(text);
 		if (m.find()) {
 			String queryType = m.group(1);
-			// String subQueryType = m.group(2);
+			String querySubType = m.group(2);
 			String rawQuestion = m.group(3);
 			List<QueryTerm> terms = getQueryTerms(rawQuestion);
 			QuestionInfo questionInfo = new QuestionInfoImpl(
-					QueryType.valueOf(queryType), terms, rawQuestion);
+					QueryType.valueOf(queryType), QuerySubType.valueOf(String.format("%s_%s", queryType, querySubType)), terms, rawQuestion);
 			// System.out.println(questionInfo);
 			return questionInfo;
 		} else {

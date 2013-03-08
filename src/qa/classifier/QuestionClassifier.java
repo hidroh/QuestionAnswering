@@ -3,13 +3,13 @@ package qa.classifier;
 import java.util.List;
 
 import qa.model.enumerator.QueryType;
-import qa.model.ClassifierTrainingInfo;
+import qa.model.ClassifierInfo;
 import qa.model.QuestionInfo;
 
 public interface QuestionClassifier {
-	ClassifierTrainingInfo train(List<QueryType> queryTypes,
+	ClassifierInfo train(List<QueryType> queryTypes,
 			List<QuestionInfo> questions);
 
 	QueryType apply(List<QueryType> queryTypes,
-			ClassifierTrainingInfo trainingInfo, String question);
+			ClassifierInfo trainingInfo, String question);
 }
