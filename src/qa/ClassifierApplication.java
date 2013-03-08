@@ -58,22 +58,33 @@ public class ClassifierApplication {
 			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
+				int subCorrect = 0;
 				for (QuestionInfo question : testData) {
 					// System.out.printf("\nQ: \"%s\"\n", question.getRaw());
 					// System.out.printf(
 					// "Classified as: %s\n",
 					// qc.apply(helper.getAllQueryTypes(), trainingInfo,
 					// question.getRaw()));
-					QueryType classified = qc.apply(helper.getAllQueryTypes(),
-							trainingInfo, question.getRaw());
-					QueryType expected = question.getQueryType();
-					if (classified == expected) {
+					String[] classified = qc.apply(helper.getAllQueryTypes(),
+							helper.getAllQuerySubTypes(), trainingInfo,
+							question.getRaw());
+					String expected = question.getQueryType().toString();
+					String subExpected = question.getQuerySubType().toString();
+					if (classified[0].equals(expected)) {
 						correct++;
+					}
+
+					if (classified[1].equals(subExpected)) {
+						subCorrect++;
 					}
 				}
 
-				System.out.printf("Evaluation result: %d / %d = %.2f", correct,
-						testData.size(), (double) correct / testData.size());
+				System.out
+						.printf("Evaluation result: [TYPE] %d / %d = %.2f, [SUB_TYPE]  %d / %d = %.2f",
+								correct, testData.size(), (double) correct
+										/ testData.size(), subCorrect,
+								testData.size(),
+								(double) subCorrect / testData.size());
 			} else {
 				System.err
 						.println("Operation halted, unable to retrieve trained data");
@@ -97,8 +108,10 @@ public class ClassifierApplication {
 				String question = args[i];
 				ClassifierHelper helper = ClassifierHelper.getInstance();
 				System.out.printf("\nQ: \"%s\"\n", question);
-				System.out.printf("Classified as: %s\n", qc.apply(
-						helper.getAllQueryTypes(), trainingInfo, question));
+				String[] classified = qc.apply(helper.getAllQueryTypes(),
+						helper.getAllQuerySubTypes(), trainingInfo, question);
+				System.out.printf("Classified as: %s:%s\n", classified[0],
+						classified[1]);
 
 			}
 		} else {

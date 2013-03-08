@@ -11,6 +11,6 @@ public interface QuestionClassifier {
 	ClassifierInfo train(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
 			List<QuestionInfo> questions);
 
-	QueryType apply(List<QueryType> queryTypes,
+	String[] apply(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
 			ClassifierInfo trainingInfo, String question);
 }

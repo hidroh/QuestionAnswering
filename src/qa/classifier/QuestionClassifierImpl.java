@@ -104,25 +104,50 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	@Override
-	public QueryType apply(List<QueryType> queryTypes,
-			ClassifierInfo trainingInfo, String question) {
+	public String[] apply(List<QueryType> queryTypes,
+			List<QuerySubType> querySubTypes, ClassifierInfo trainingInfo,
+			String question) {
 		List<String> terms = extractQueryTerms(trainingInfo.getVocabulary(),
 				question);
-		Map<QueryType, Double> score = new HashMap<QueryType, Double>();
-		for (QueryType c : queryTypes) {
-			score.put(c, Math.log(trainingInfo.getPrior().get(c)));
+		List<String> strQueryTypes = new ArrayList<String>();
+		for (QueryType t : queryTypes) {
+			strQueryTypes.add(t.toString());
+		}
+
+		boolean IS_SUB_TYPE = false;
+		String queryTypeString = getClassification(strQueryTypes, trainingInfo,
+				terms, IS_SUB_TYPE);
+
+		List<String> strQuerySubTypes = new ArrayList<String>();
+		for (QuerySubType t : querySubTypes) {
+			strQuerySubTypes.add(t.toString());
+		}
+
+		IS_SUB_TYPE = true;
+		String querySubTypeString = getClassification(strQuerySubTypes,
+				trainingInfo, terms, IS_SUB_TYPE);
+		return new String[] { queryTypeString, querySubTypeString };
+	}
+
+	public String getClassification(List<String> queryTypes,
+			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
+		Map<String, Double> score = new HashMap<String, Double>();
+		for (String c : queryTypes) {
+			Map<String, Double> prior = isSubType ? trainingInfo.getSubPrior()
+					: trainingInfo.getPrior();
+			score.put(c, Math.log(prior.get(c)));
 			for (String t : terms) {
-				if (trainingInfo.getConditionalProbability().containsKey(t)) {
-					score.put(
-							c,
-							score.get(c)
-									+ Math.log(trainingInfo
-											.getConditionalProbability().get(t)
-											.get(c)));
+				Map<String, Map<String, Double>> condProb = isSubType ? trainingInfo
+						.getSubConditionalProbability() : trainingInfo
+						.getConditionalProbability();
+				if (condProb.containsKey(t)) {
+					score.put(c,
+							score.get(c) + Math.log(condProb.get(t).get(c)));
 
 				}
 			}
 		}
+		// getArgsMax(score, 0.7, 2);
 
 		return getArgMax(score);
 	}
@@ -222,48 +247,59 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return count;
 	}
 
-	private QueryType getArgMax(Map<QueryType, Double> score) {
-		List<Map.Entry<QueryType, Double>> scoreList = new ArrayList<Map.Entry<QueryType, Double>>(
+	private String getArgMax(Map<String, Double> score) {
+		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
 				score.entrySet());
 		Collections.sort(scoreList,
-				new Comparator<Map.Entry<QueryType, Double>>() {
-					public int compare(Map.Entry<QueryType, Double> o1,
-							Map.Entry<QueryType, Double> o2) {
+				new Comparator<Map.Entry<String, Double>>() {
+					public int compare(Map.Entry<String, Double> o1,
+							Map.Entry<String, Double> o2) {
 						return ((Comparable<Double>) o2.getValue())
 								.compareTo(o1.getValue());
 					}
 				});
 
 		if (!suppressLog) {
-			for (Map.Entry<QueryType, Double> e : scoreList) {
-				System.out.printf("  %-5s => %.2f\n", e.getKey(), e.getValue());
+			int count = 0;
+			for (Map.Entry<String, Double> e : scoreList) {
+				System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
+				count++;
+				if (count % 3 == 0) {
+					System.out.println();
+				} else {
+					System.out.print("\t");
+				}
 			}
+			
+			System.out.println();
 		}
 
 		return scoreList.get(0).getKey();
 	}
 
-	private List<QueryType> getArgsMax(Map<QueryType, Double> score, double t,
+	private List<String> getArgsMax(Map<String, Double> score, double t,
 			int k) {
-		List<Map.Entry<QueryType, Double>> scoreList = new ArrayList<Map.Entry<QueryType, Double>>(
+		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
 				score.entrySet());
 		Collections.sort(scoreList,
-				new Comparator<Map.Entry<QueryType, Double>>() {
-					public int compare(Map.Entry<QueryType, Double> o1,
-							Map.Entry<QueryType, Double> o2) {
+				new Comparator<Map.Entry<String, Double>>() {
+					public int compare(Map.Entry<String, Double> o1,
+							Map.Entry<String, Double> o2) {
 						return ((Comparable<Double>) o2.getValue())
 								.compareTo(o1.getValue());
 					}
 				});
 
-		List<QueryType> results = new ArrayList<QueryType>();
+		List<String> results = new ArrayList<String>();
 		double threshold = scoreList.get(0).getValue() / t;
+		System.out.print("Possible classes: ");
 		for (int i = 0; i < scoreList.size() && i < k
 				&& scoreList.get(i).getValue() > threshold; i++) {
 			results.add(scoreList.get(i).getKey());
-			System.out.println(scoreList.get(i).getKey());
+			System.out.print(scoreList.get(i).getKey() + ", ");
 		}
-
+		System.out.println();
+		
 		return results;
 	}
 }
