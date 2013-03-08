@@ -12,16 +12,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import qa.Application;
 import qa.model.QueryTerm;
 import qa.model.QueryTermImpl;
 import qa.model.QuestionInfo;
 import qa.model.QuestionInfoImpl;
 import qa.model.enumerator.QueryType;
 
-public class QuestionClassifierHelper {
+public class ClassifierHelper {
 
-	private static QuestionClassifierHelper instance;
+	private static ClassifierHelper instance;
 	private final String re1 = "((?:[a-z][a-z]+))"; // Word 1
 	private final String re2 = ":"; // Non-greedy match on filler
 	private final String re3 = "((?:[a-z][a-z]+))"; // Word 2
@@ -31,30 +30,29 @@ public class QuestionClassifierHelper {
 	private final Pattern p = Pattern.compile(re1 + re2 + re3 + re4 + re5,
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-	private QuestionClassifierHelper() {
+	private ClassifierHelper() {
 
 	}
 
-	public static QuestionClassifierHelper getInstance() {
+	public static ClassifierHelper getInstance() {
 		if (instance == null) {
-			instance = new QuestionClassifierHelper();
+			instance = new ClassifierHelper();
 		}
 
 		return instance;
 	}
 
-	public List<QuestionInfo> getTrainingData(String corpusPath) {
+	public List<QuestionInfo> getAnnotatedData(String corpusPath,
+			final String prefix, final String ext) throws Exception {
+		if (corpusPath == null) {
+			throw new Exception("Corpus path is missing");
+		}
 		List<QuestionInfo> trainingData = new ArrayList<QuestionInfo>();
 		File folder = new File(corpusPath);
 		File[] fileList = folder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(
-						Application.Settings.getProperty(
-								"CLASSIFIER_TRAINING_EXT").toLowerCase())
-						&& name.toLowerCase().startsWith(
-								Application.Settings.getProperty(
-										"CLASSIFIER_TRAINING_PREFIX")
-										.toLowerCase());
+				return name.toLowerCase().endsWith(ext.toLowerCase())
+						&& name.toLowerCase().startsWith(prefix.toLowerCase());
 			}
 		});
 		for (File file : fileList) {
@@ -68,14 +66,12 @@ public class QuestionClassifierHelper {
 					trainingData.add(getQuestionInfo(line));
 				}
 
-				System.out.printf("Training set: %s [ %d questions]\n",
+				System.out.printf("Data set: %s [ %d questions]\n",
 						file.getName(), questionCount);
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(String.format("Corpus not found: %s/%s*%s", corpusPath, prefix, ext));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err.println(String.format("Unable to read corpus: %s/%s*%s", corpusPath, prefix, ext));
 			}
 
 		}
@@ -91,7 +87,7 @@ public class QuestionClassifierHelper {
 			String rawQuestion = m.group(3);
 			List<QueryTerm> terms = getQueryTerms(rawQuestion);
 			QuestionInfo questionInfo = new QuestionInfoImpl(
-					QueryType.valueOf(queryType), terms);
+					QueryType.valueOf(queryType), terms, rawQuestion);
 			// System.out.println(questionInfo);
 			return questionInfo;
 		} else {

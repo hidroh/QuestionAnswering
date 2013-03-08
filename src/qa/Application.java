@@ -1,19 +1,12 @@
 package qa;
 
 import java.io.File;
-import java.lang.ClassNotFoundException;
 import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import qa.classifier.QuestionClassifier;
-import qa.classifier.QuestionClassifierImpl;
 import qa.extractor.AnswerExtractor;
 import qa.factory.AnswerExtractorFactory;
 import qa.factory.AnswerExtractorFactoryImpl;
@@ -27,10 +20,8 @@ import qa.factory.QuestionParserFactory;
 import qa.factory.QuestionParserFactoryImpl;
 import qa.factory.SearchEngineFactory;
 import qa.factory.SearchEngineFactoryImpl;
-import qa.helper.QuestionClassifierHelper;
 import qa.indexer.DocumentIndexer;
 import qa.model.AnswerInfo;
-import qa.model.ClassifierTrainingInfo;
 import qa.model.Document;
 import qa.model.Passage;
 import qa.model.QuestionInfo;
@@ -55,13 +46,7 @@ public class Application {
 			return;
 		}
 
-		if (args[0].equals("-train")) {
-			generateClassifierTrainingInfo();
-		} else if (args[0].equals("-qc")) {
-			classifyQuestions(args);
-		} else {
-			answer(args);
-		}
+		answer(args);
 
 	}
 
@@ -139,35 +124,12 @@ public class Application {
 		}
 	}
 
-	private static void classifyQuestions(String[] args) {
-		if (args.length < 2) {
-			return;
-		}
-
-		ClassifierTrainingInfo trainingInfo = loadClassifierTrainingInfo();
-		QuestionClassifier qc = new QuestionClassifierImpl();
-		for (int i = 1; i < args.length; i++) {
-			String question = args[i];
-			QuestionClassifierHelper helper = QuestionClassifierHelper
-					.getInstance();
-			System.out.printf("\nQ: \"%s\"\n", question);
-			System.out
-					.printf("Classified as: %s\n", qc.apply(
-							helper.getAllQueryTypes(), trainingInfo, question));
-
-		}
-	}
-
 	private static void printUsage() {
 		System.out
 				.println("Usage: java Application <options> \"<question1>\" \"<question2>\"... ");
-		System.out.println("where possible options include:");
-		System.out.printf("  %-15s %s\n", "-train",
-				"Only train question classifier, no input questions required");
-		System.out.printf("  %-15s %s\n", "-qc", "Only classifiy questions");
 		System.out.println();
 		System.out
-				.println("Run configuration stored in 'bin/Application.properties'");
+				.println("Run configuration stored in 'Application.properties'");
 		System.out
 				.println("Example: java Application \"Where is Milan ?\" \"Who developed the Macintosh computer ?\" ");
 	}
@@ -179,59 +141,6 @@ public class Application {
 			System.out.printf("[%-5s] %s\n", resultInfo.getSupportingDocument()
 					.getId(), resultInfo.getAnswer());
 		}
-	}
-
-	private static void generateClassifierTrainingInfo() {
-		QuestionClassifierHelper helper = QuestionClassifierHelper
-				.getInstance();
-		List<QuestionInfo> trainingData = helper
-				.getTrainingData(Application.Settings
-						.getProperty("CORPUS_PATH"));
-		QuestionClassifier qc = new QuestionClassifierImpl();
-		ClassifierTrainingInfo trainingInfo = qc.train(
-				helper.getAllQueryTypes(), trainingData);
-
-		try {
-			File classifierOutput = new File(
-					Application.Settings.getProperty("CLASSIFIER_PATH"));
-			if (!classifierOutput.isFile()) {
-				classifierOutput.createNewFile();
-			}
-
-			FileOutputStream f_out = new FileOutputStream(
-					Application.Settings.getProperty("CLASSIFIER_PATH"));
-			ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
-			obj_out.writeObject(trainingInfo);
-			obj_out.close();
-		} catch (FileNotFoundException fnfe) {
-
-		} catch (IOException ioe) {
-
-		}
-
-		System.out.println(trainingInfo);
-		System.out.println("Training all done!");
-	}
-
-	private static ClassifierTrainingInfo loadClassifierTrainingInfo() {
-		try {
-			FileInputStream f_in = new FileInputStream(
-					Application.Settings.getProperty("CLASSIFIER_PATH"));
-			ObjectInputStream obj_in = new ObjectInputStream(f_in);
-			Object obj = obj_in.readObject();
-			obj_in.close();
-			if (obj instanceof ClassifierTrainingInfo) {
-				return (ClassifierTrainingInfo) obj;
-			}
-		} catch (FileNotFoundException fnfe) {
-
-		} catch (IOException ioe) {
-
-		} catch (ClassNotFoundException cnfe) {
-
-		}
-
-		return null;
 	}
 
 	private static void loadProperties() {

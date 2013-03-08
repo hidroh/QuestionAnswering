@@ -20,4 +20,6 @@ public interface QuestionInfo {
 	 * @return query type
 	 */
 	QueryType getQueryType();
+
+	String getRaw();
 }

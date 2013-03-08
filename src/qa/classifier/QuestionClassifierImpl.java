@@ -11,9 +11,14 @@ import qa.model.ClassifierTrainingInfoImpl;
 import qa.model.QueryTerm;
 import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
-import qa.helper.QuestionClassifierHelper;
+import qa.helper.ClassifierHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
+	private boolean suppressLog = false;
+
+	public QuestionClassifierImpl(boolean suppressLog) {
+		this.suppressLog = suppressLog;
+	}
 
 	@Override
 	public ClassifierTrainingInfo train(List<QueryType> queryTypes,
@@ -94,19 +99,21 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 	public List<String> extractQueryTerms(Set<String> vocabulary,
 			String question) {
-		QuestionClassifierHelper helper = QuestionClassifierHelper
-				.getInstance();
+		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QueryTerm> terms = helper.getQueryTerms(question);
 		List<String> extracted = new ArrayList<String>();
-		System.out.print("{ ");
+		if (!suppressLog)
+			System.out.print("{ ");
 		for (QueryTerm queryTerm : terms) {
 			String term = queryTerm.getText();
-			System.out.print(term + ", ");
+			if (!suppressLog)
+				System.out.print(term + ", ");
 			if (vocabulary.contains(term)) {
 				extracted.add(term);
 			}
 		}
-		System.out.println(" }");
+		if (!suppressLog)
+			System.out.println(" }");
 
 		return extracted;
 	}
@@ -172,8 +179,9 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		QueryType classifiedType = null;
 		Double maxScore = Double.NEGATIVE_INFINITY;
 		for (QueryType queryType : score.keySet()) {
-			System.out.printf("  %-5s => %.2f\n", queryType.toString(),
-					score.get(queryType));
+			if (!suppressLog)
+				System.out.printf("  %-5s => %.2f\n", queryType.toString(),
+						score.get(queryType));
 			if (score.get(queryType) > maxScore) {
 				maxScore = score.get(queryType);
 				classifiedType = queryType;

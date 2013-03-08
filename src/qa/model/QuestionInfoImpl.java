@@ -7,10 +7,12 @@ import qa.model.enumerator.QueryType;
 public class QuestionInfoImpl implements QuestionInfo {
 	private List<QueryTerm> terms;
 	private QueryType queryType;
+	private String raw;
 	
-	public QuestionInfoImpl(QueryType queryType, List<QueryTerm> terms) {
+	public QuestionInfoImpl(QueryType queryType, List<QueryTerm> terms, String raw) {
 		this.terms = terms;
 		this.queryType = queryType;
+		this.raw = raw;
 	}
 	
 	@Override
@@ -21,6 +23,11 @@ public class QuestionInfoImpl implements QuestionInfo {
 	@Override
 	public QueryType getQueryType() {
 		return queryType;
+	}
+
+	@Override
+	public String getRaw() {
+		return raw;
 	}
 
 	public String toString() {
