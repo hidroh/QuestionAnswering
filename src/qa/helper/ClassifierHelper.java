@@ -70,9 +70,12 @@ public class ClassifierHelper {
 				System.out.printf("Data set: %s [ %d questions]\n",
 						file.getName(), questionCount);
 			} catch (FileNotFoundException e) {
-				System.err.println(String.format("Corpus not found: %s/%s*%s", corpusPath, prefix, ext));
+				System.err.println(String.format("Corpus not found: %s/%s*%s",
+						corpusPath, prefix, ext));
 			} catch (IOException e) {
-				System.err.println(String.format("Unable to read corpus: %s/%s*%s", corpusPath, prefix, ext));
+				System.err.println(String.format(
+						"Unable to read corpus: %s/%s*%s", corpusPath, prefix,
+						ext));
 			}
 
 		}
@@ -88,7 +91,9 @@ public class ClassifierHelper {
 			String rawQuestion = m.group(3);
 			List<QueryTerm> terms = getQueryTerms(rawQuestion);
 			QuestionInfo questionInfo = new QuestionInfoImpl(
-					QueryType.valueOf(queryType), QuerySubType.valueOf(String.format("%s_%s", queryType, querySubType)), terms, rawQuestion);
+					QueryType.valueOf(queryType), QuerySubType.valueOf(String
+							.format("%s_%s", queryType, querySubType)), terms,
+					rawQuestion);
 			// System.out.println(questionInfo);
 			return questionInfo;
 		} else {
@@ -110,5 +115,9 @@ public class ClassifierHelper {
 
 	public List<QueryType> getAllQueryTypes() {
 		return Arrays.asList(QueryType.class.getEnumConstants());
+	}
+
+	public List<QuerySubType> getAllQuerySubTypes() {
+		return Arrays.asList(QuerySubType.class.getEnumConstants());
 	}
 }

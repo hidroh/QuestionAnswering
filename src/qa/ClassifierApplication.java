@@ -47,22 +47,23 @@ public class ClassifierApplication {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QuestionInfo> testData;
 		try {
-			testData = helper.getAnnotatedData(
-					ClassifierApplication.Settings.getProperty("TEST_CORPUS_PATH"),
+			testData = helper.getAnnotatedData(ClassifierApplication.Settings
+					.getProperty("TEST_CORPUS_PATH"),
 					ClassifierApplication.Settings
 							.getProperty("TEST_CORPUS_PREFIX"),
-					ClassifierApplication.Settings.getProperty("TEST_CORPUS_EXT"));
+					ClassifierApplication.Settings
+							.getProperty("TEST_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
 				for (QuestionInfo question : testData) {
-//					System.out.printf("\nQ: \"%s\"\n", question.getRaw());
-//					System.out.printf(
-//							"Classified as: %s\n",
-//							qc.apply(helper.getAllQueryTypes(), trainingInfo,
-//									question.getRaw()));
+					// System.out.printf("\nQ: \"%s\"\n", question.getRaw());
+					// System.out.printf(
+					// "Classified as: %s\n",
+					// qc.apply(helper.getAllQueryTypes(), trainingInfo,
+					// question.getRaw()));
 					QueryType classified = qc.apply(helper.getAllQueryTypes(),
 							trainingInfo, question.getRaw());
 					QueryType expected = question.getQueryType();
@@ -72,9 +73,10 @@ public class ClassifierApplication {
 				}
 
 				System.out.printf("Evaluation result: %d / %d = %.2f", correct,
-						testData.size(), (double)correct / testData.size());			
+						testData.size(), (double) correct / testData.size());
 			} else {
-				System.err.println("Operation halted, unable to retrieve trained data");
+				System.err
+						.println("Operation halted, unable to retrieve trained data");
 			}
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -95,13 +97,13 @@ public class ClassifierApplication {
 				String question = args[i];
 				ClassifierHelper helper = ClassifierHelper.getInstance();
 				System.out.printf("\nQ: \"%s\"\n", question);
-				System.out
-						.printf("Classified as: %s\n", qc.apply(
-								helper.getAllQueryTypes(), trainingInfo, question));
+				System.out.printf("Classified as: %s\n", qc.apply(
+						helper.getAllQueryTypes(), trainingInfo, question));
 
-			}			
+			}
 		} else {
-			System.err.println("Operation halted, unable to retrieve trained data");
+			System.err
+					.println("Operation halted, unable to retrieve trained data");
 		}
 	}
 
@@ -125,17 +127,17 @@ public class ClassifierApplication {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QuestionInfo> trainingData;
 		try {
-			trainingData = helper
-					.getAnnotatedData(ClassifierApplication.Settings
+			trainingData = helper.getAnnotatedData(
+					ClassifierApplication.Settings
 							.getProperty("TRAIN_CORPUS_PATH"),
-							ClassifierApplication.Settings
-									.getProperty("TRAIN_CORPUS_PREFIX"),
-							ClassifierApplication.Settings
-									.getProperty("TRAIN_CORPUS_EXT"));
+					ClassifierApplication.Settings
+							.getProperty("TRAIN_CORPUS_PREFIX"),
+					ClassifierApplication.Settings
+							.getProperty("TRAIN_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			ClassifierInfo trainingInfo = qc.train(
-					helper.getAllQueryTypes(), trainingData);
+			ClassifierInfo trainingInfo = qc.train(helper.getAllQueryTypes(),
+					helper.getAllQuerySubTypes(), trainingData);
 
 			try {
 				File classifierOutput = new File(
@@ -201,7 +203,9 @@ public class ClassifierApplication {
 			// System.out.println(key + " => " + value);
 			// }
 		} catch (IOException e) {
-			System.err.println(String.format("Unable to load application settings from %s", propertiesPath));
+			System.err.println(String.format(
+					"Unable to load application settings from %s",
+					propertiesPath));
 		}
 	}
 }

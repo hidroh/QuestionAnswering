@@ -13,6 +13,7 @@ import qa.model.ClassifierInfoImpl;
 import qa.model.QueryTerm;
 import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
+import qa.model.enumerator.QuerySubType;
 import qa.helper.ClassifierHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
@@ -24,30 +25,59 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 	@Override
 	public ClassifierInfo train(List<QueryType> queryTypes,
-			List<QuestionInfo> questions) {
+			List<QuerySubType> querySubTypes, List<QuestionInfo> questions) {
 		Set<String> v = new HashSet<String>();
-		Map<QueryType, Double> prior = new HashMap<QueryType, Double>();
-		Map<String, Map<QueryType, Double>> condProb = new HashMap<String, Map<QueryType, Double>>();
 		v.addAll(extractVocabulary(questions));
 		System.out.printf("Training questions = %d, vocabulary count = %d\n",
 				questions.size(), v.size());
 		int n = questions.size();
 
+		List<String> strQueryTypes = new ArrayList<String>();
+		for (QueryType t : queryTypes) {
+			strQueryTypes.add(t.toString());
+		}
+
+		Map<String, Double> prior = new HashMap<String, Double>();
+		Map<String, Map<String, Double>> condProb = new HashMap<String, Map<String, Double>>();
+		boolean IS_SUB_TYPE = false;
+		calculatePriorAndCondProb(strQueryTypes, questions, v, prior, condProb,
+				n, IS_SUB_TYPE);
+
+		List<String> strQuerySubTypes = new ArrayList<String>();
+		for (QuerySubType t : querySubTypes) {
+			strQuerySubTypes.add(t.toString());
+		}
+
+		Map<String, Double> subPrior = new HashMap<String, Double>();
+		Map<String, Map<String, Double>> subCondProb = new HashMap<String, Map<String, Double>>();
+		IS_SUB_TYPE = true;
+		calculatePriorAndCondProb(strQuerySubTypes, questions, v, subPrior,
+				subCondProb, n, IS_SUB_TYPE);
+		ClassifierInfo trainingInfo = new ClassifierInfoImpl(v, prior,
+				condProb, subPrior, subCondProb);
+		return trainingInfo;
+	}
+
+	private void calculatePriorAndCondProb(List<String> queryTypes,
+			List<QuestionInfo> questions, Set<String> v,
+			Map<String, Double> prior,
+			Map<String, Map<String, Double>> condProb, int n, boolean isSubType) {
 		double test_sum_prior = 0;
-		for (QueryType c : queryTypes) {
-			System.out.println(String.format("c = %s", c.toString()));
+		for (String c : queryTypes) {
+			System.out.println(String.format("c = %s", c));
 			int sum_t_ct = 0;
-			int n_c = countQuestionsInClass(questions, c);
+			int n_c = countQuestionsInClass(questions, c, isSubType);
 			prior.put(c, (double) n_c / n);
 			test_sum_prior += (double) n_c / n;
 			double test_sum_condprob = 0;
-			List<String> text_c = concatQuestionsInclass(questions, c);
+			List<String> text_c = concatQuestionsInclass(questions, c,
+					isSubType);
 			for (String t : v) {
-				Map<QueryType, Double> classTermCount;
+				Map<String, Double> classTermCount;
 				if (condProb.get(t) != null) {
 					classTermCount = condProb.get(t);
 				} else {
-					classTermCount = new HashMap<QueryType, Double>();
+					classTermCount = new HashMap<String, Double>();
 				}
 				int t_ct = countTerm(text_c, t);
 				sum_t_ct += t_ct;
@@ -56,7 +86,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 			}
 
 			for (String t : v) {
-				Map<QueryType, Double> classTermCount = condProb.get(t);
+				Map<String, Double> classTermCount = condProb.get(t);
 				condProb.get(t).put(c,
 						(classTermCount.get(c) + 1) / (sum_t_ct + v.size()));
 				// System.out.println(String.format("condprob[%s,%s] = %f", t,
@@ -65,13 +95,12 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 			}
 
 			assert Math.abs(test_sum_condprob - 1) < 0.00001 : String
-					.format("Conditional probabilities given class = '%s' do not sum up to 1",
-							c.toString());
+					.format("Conditional probabilities given class = '%s' do not sum up to 1: %.2f",
+							c, test_sum_condprob);
 		}
 
-		assert Math.abs(test_sum_prior - 1) < 0.00001 : "Priors do not sum up to 1";
-		ClassifierInfo trainingInfo = new ClassifierInfoImpl(v, prior, condProb);
-		return trainingInfo;
+		assert Math.abs(test_sum_prior - 1) < 0.00001 : String.format(
+				"Priors do not sum up to 1: %.2f", test_sum_prior);
 	}
 
 	@Override
@@ -140,11 +169,17 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	private int countQuestionsInClass(List<QuestionInfo> questions,
-			QueryType queryType) {
+			String queryType, boolean isSubType) {
 		int count = 0;
 		for (QuestionInfo question : questions) {
-			if (question.getQueryType() == queryType) {
-				count++;
+			if (isSubType) {
+				if (question.getQuerySubType().toString().equals(queryType)) {
+					count++;
+				}
+			} else {
+				if (question.getQueryType().toString().equals(queryType)) {
+					count++;
+				}
 			}
 		}
 
@@ -152,10 +187,21 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	private List<String> concatQuestionsInclass(List<QuestionInfo> questions,
-			QueryType queryType) {
+			String queryType, boolean isSubType) {
 		List<String> terms = new ArrayList<String>();
 		for (QuestionInfo question : questions) {
-			if (question.getQueryType() == queryType) {
+			boolean concat = false;
+			if (isSubType) {
+				if (question.getQuerySubType().toString().equals(queryType)) {
+					concat = true;
+				}
+			} else {
+				if (question.getQueryType().toString().equals(queryType)) {
+					concat = true;
+				}
+			}
+
+			if (concat) {
 				for (QueryTerm term : question.getQuestionTerms()) {
 					terms.add(term.getText());
 				}
@@ -197,7 +243,8 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return scoreList.get(0).getKey();
 	}
 
-	private List<QueryType> getArgsMax(Map<QueryType, Double> score, double t, int k) {
+	private List<QueryType> getArgsMax(Map<QueryType, Double> score, double t,
+			int k) {
 		List<Map.Entry<QueryType, Double>> scoreList = new ArrayList<Map.Entry<QueryType, Double>>(
 				score.entrySet());
 		Collections.sort(scoreList,
@@ -211,7 +258,8 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		List<QueryType> results = new ArrayList<QueryType>();
 		double threshold = scoreList.get(0).getValue() / t;
-		for (int i = 0; i < scoreList.size() && i < k && scoreList.get(i).getValue() > threshold; i++) {
+		for (int i = 0; i < scoreList.size() && i < k
+				&& scoreList.get(i).getValue() > threshold; i++) {
 			results.add(scoreList.get(i).getKey());
 			System.out.println(scoreList.get(i).getKey());
 		}
