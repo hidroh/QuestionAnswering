@@ -16,7 +16,6 @@ import qa.classifier.QuestionClassifierImpl;
 import qa.helper.ClassifierHelper;
 import qa.model.ClassifierInfo;
 import qa.model.QuestionInfo;
-import qa.model.enumerator.QueryType;
 
 public class ClassifierApplication {
 

@@ -115,21 +115,50 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		boolean IS_SUB_TYPE = false;
-		String queryTypeString = getClassification(strQueryTypes, trainingInfo,
+		// String queryTypeString = getClassification(strQueryTypes, trainingInfo,
+		// 		terms, IS_SUB_TYPE);
+		List<String> classifiedTypes = getMultiClassification(strQueryTypes, trainingInfo,
 				terms, IS_SUB_TYPE);
+
+		// List<String> strQuerySubTypes = new ArrayList<String>();
+		// for (QuerySubType t : querySubTypes) {
+		// 	strQuerySubTypes.add(t.toString());
+		// }
 
 		List<String> strQuerySubTypes = new ArrayList<String>();
 		for (QuerySubType t : querySubTypes) {
-			strQuerySubTypes.add(t.toString());
+			for (String parentType : classifiedTypes) {
+				if (t.toString().startsWith(parentType)) {
+					strQuerySubTypes.add(t.toString());
+					break;
+				}
+			}
 		}
 
 		IS_SUB_TYPE = true;
 		String querySubTypeString = getClassification(strQuerySubTypes,
 				trainingInfo, terms, IS_SUB_TYPE);
-		return new String[] { queryTypeString, querySubTypeString };
+		// return new String[] { queryTypeString, querySubTypeString };
+		return new String[] { classifiedTypes.get(0), querySubTypeString };
 	}
 
-	public String getClassification(List<String> queryTypes,
+	private String getClassification(List<String> queryTypes,
+			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
+		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
+				terms, isSubType);		// getArgsMax(score, 0.7, 2);
+
+		return getArgMax(score);
+	}
+
+	private List<String> getMultiClassification(List<String> queryTypes,
+			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
+		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
+				terms, isSubType);
+
+		return getArgsMax(score, 0.7, 2);
+	}
+
+	private Map<String, Double> calculateScore(List<String> queryTypes,
 			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
 		Map<String, Double> score = new HashMap<String, Double>();
 		for (String c : queryTypes) {
@@ -147,12 +176,10 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 				}
 			}
 		}
-		// getArgsMax(score, 0.7, 2);
-
-		return getArgMax(score);
+		return score;
 	}
 
-	public List<String> extractQueryTerms(Set<String> vocabulary,
+	private List<String> extractQueryTerms(Set<String> vocabulary,
 			String question) {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QueryTerm> terms = helper.getQueryTerms(question);
@@ -292,13 +319,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		List<String> results = new ArrayList<String>();
 		double threshold = scoreList.get(0).getValue() / t;
-		System.out.print("Possible classes: ");
+		if (!suppressLog) System.out.print("Possible classes: ");
 		for (int i = 0; i < scoreList.size() && i < k
 				&& scoreList.get(i).getValue() > threshold; i++) {
 			results.add(scoreList.get(i).getKey());
-			System.out.print(scoreList.get(i).getKey() + ", ");
+			if (!suppressLog) System.out.print(scoreList.get(i).getKey() + ", ");
 		}
-		System.out.println();
+		if (!suppressLog) System.out.println();
 		
 		return results;
 	}
