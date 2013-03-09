@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,7 +19,15 @@ import qa.model.ClassifierInfo;
 import qa.model.QuestionInfo;
 
 public class ClassifierApplication {
-
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_BLACK = "\u001B[30m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
 	public static Properties Settings;
 
 	/**
@@ -35,15 +44,16 @@ public class ClassifierApplication {
 		if (args[0].equals("train")) {
 			train();
 		} else if (args[0].equals("eval")) {
-			evaluate(args);
+			evaluate(Arrays.asList(args));
 		} else {
 			classify(args);
 		}
 
 	}
 
-	private static void evaluate(String[] options) {
-		boolean debug = options.length >= 2 && options[1].equals("-debug");
+	private static void evaluate(List<String> options) {
+		boolean debug = options.size() >= 2 && options.contains("-debug");
+		boolean color = options.size() >= 2 && options.contains("-color");
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QuestionInfo> testData;
 		try {
@@ -93,8 +103,14 @@ public class ClassifierApplication {
 					if (isSubCorrect) {
 						subCorrect++;
 					} else if (debug) {
-						String format = "-- %-20s ++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_LIMIT"))) + "s] %s\n";
+						String format = "";
+						if (color) {
+							format = ANSI_GREEN + "-- %-20s " + ANSI_RED + "++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
+								.getProperty("CLASSIFIER_LIMIT"))) + "s]" + ANSI_RESET + " %s\n";
+						} else {
+							format = "-- %-20s ++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
+								.getProperty("CLASSIFIER_LIMIT"))) + "s] %s\n";
+						}
 						System.out.printf(format, subExpected, subClassified, question.getRaw());
 					}
 				}
@@ -153,12 +169,19 @@ public class ClassifierApplication {
 	private static void printUsage() {
 		System.out
 				.println("Usage: java ClassifierApplication <command> <options> \"<question1>\" \"<question2>\"... ");
-		System.out.println("where possible commands and options include:");
+		System.out.println("Available commands:");
 		System.out.printf("  %-15s %s\n", "train",
 				"Only train question classifier, no input questions required");
 		System.out
-				.printf("  %-15s %s\n", "eval [-debug]",
-						"Only evaluate question classifier, no input questions required, optionally print out debug information");
+				.printf("  %-15s %s\n", "eval",
+						"Only evaluate question classifier, no input questions required");
+		System.out.println("  Eval options:");
+		System.out
+				.printf("  %-15s %s\n", "-debug",
+						"Print out debug information");
+		System.out
+				.printf("  %-15s %s\n", "-color",
+						"Colorize output");
 		System.out.println();
 		System.out
 				.println("Run configuration stored in '/Application.properties'");
