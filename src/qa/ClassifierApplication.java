@@ -67,19 +67,29 @@ public class ClassifierApplication {
 					// "Classified as: %s\n",
 					// qc.apply(helper.getAllQueryTypes(), trainingInfo,
 					// question.getRaw()));
-					String[] classified = qc.apply(helper.getAllQueryTypes(),
+					List<String> classified = qc.apply(helper.getAllQueryTypes(),
 							helper.getAllQuerySubTypes(), trainingInfo,
 							question.getRaw());
 					String expected = question.getQueryType().toString();
 					String subExpected = question.getQuerySubType().toString();
-					if (classified[0].equals(expected)) {
+					if (classified.get(0).equals(expected)) {
 						correct++;
 					}
 
-					if (classified[1].equals(subExpected)) {
+					String subClassified = "";
+					boolean isSubCorrect = false;
+					for (int i = 1; i < classified.size(); i++) {
+						subClassified += String.format("%-15s", classified.get(i));
+						if (classified.get(i).equals(subExpected)) {
+							isSubCorrect = true;
+							break;
+						}
+					}
+
+					if (isSubCorrect) {
 						subCorrect++;
 					} else if (debug) {
-						System.out.printf("-- %-20s ++ %-20s %s\n", subExpected, classified[1], question.getRaw());
+						System.out.printf("-- %-20s ++ [%-30s] %s\n", subExpected, subClassified, question.getRaw());
 					}
 				}
 
@@ -114,10 +124,14 @@ public class ClassifierApplication {
 			for (int i = 0; i < args.length; i++) {
 				String question = args[i];
 				System.out.printf("\nQ: \"%s\"\n", question);
-				String[] classified = qc.apply(helper.getAllQueryTypes(),
+				List<String> classified = qc.apply(helper.getAllQueryTypes(),
 						helper.getAllQuerySubTypes(), trainingInfo, question);
-				System.out.printf("Classified as: %s:%s\n", classified[0],
-						classified[1]);
+				String subClassified = "";
+				for (int j = 1; j < classified.size(); j++) {
+					subClassified += String.format("%-15s", classified.get(j));
+				}
+				System.out.printf("Classified as: %s:[%s]\n", classified.get(0),
+						subClassified);
 
 			}
 		} else {

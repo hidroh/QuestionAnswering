@@ -11,7 +11,7 @@ public interface QuestionClassifier {
 	ClassifierInfo train(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
 			List<QuestionInfo> questions);
 
-	String[] apply(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
+	List<String> apply(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
 			ClassifierInfo trainingInfo, String question);
 
     void setStopWords(List<String> stopWords);

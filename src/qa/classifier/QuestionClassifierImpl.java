@@ -105,7 +105,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	}
 
 	@Override
-	public String[] apply(List<QueryType> queryTypes,
+	public List<String> apply(List<QueryType> queryTypes,
 			List<QuerySubType> querySubTypes, ClassifierInfo trainingInfo,
 			String question) {
 		List<String> terms = extractQueryTerms(trainingInfo.getVocabulary(),
@@ -137,10 +137,16 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		IS_SUB_TYPE = true;
-		String querySubTypeString = getClassification(strQuerySubTypes,
-				trainingInfo, terms, IS_SUB_TYPE);
+		// String querySubTypeString = getClassification(strQuerySubTypes,
+		// 		trainingInfo, terms, IS_SUB_TYPE);
 		// return new String[] { queryTypeString, querySubTypeString };
-		return new String[] { classifiedTypes.get(0), querySubTypeString };
+		List<String> classifiedSubTypes = getMultiClassification(strQuerySubTypes,
+				trainingInfo, terms, IS_SUB_TYPE);
+
+		List<String> results = new ArrayList<String>();
+		results.add(classifiedTypes.get(0));
+		results.addAll(classifiedSubTypes);
+		return results;
 	}
 
 	private String getClassification(List<String> queryTypes,
