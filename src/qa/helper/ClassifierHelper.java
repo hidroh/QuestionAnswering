@@ -120,4 +120,29 @@ public class ClassifierHelper {
 	public List<QuerySubType> getAllQuerySubTypes() {
 		return Arrays.asList(QuerySubType.class.getEnumConstants());
 	}
+
+	public List<String> getStopWords(String path) {
+		List<String> stopWords = new ArrayList<String>();
+
+		Pattern wordPattern = Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE
+				| Pattern.DOTALL);
+		String line;
+		try {
+			File file = new File(path);
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			while ((line = br.readLine()) != null) {
+				Matcher m = wordPattern.matcher(line);
+				while (m.find()) {
+					stopWords.add(m.group());
+				}
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("[WARNING] Unable to find stopword list");
+		} catch (IOException e) {
+			System.out.println("[WARNING] Unable to read stopword list");
+		}
+
+		return stopWords;
+	}
 }

@@ -18,6 +18,7 @@ import qa.helper.ClassifierHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
 	private boolean suppressLog = false;
+	private List<String> stopWords;
 
 	public QuestionClassifierImpl(boolean suppressLog) {
 		this.suppressLog = suppressLog;
@@ -188,6 +189,10 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 			System.out.print("{ ");
 		for (QueryTerm queryTerm : terms) {
 			String term = queryTerm.getText();
+			if (isStopWord(term)) {
+				continue;
+			}
+
 			if (!suppressLog)
 				System.out.print(term + ", ");
 			if (vocabulary.contains(term)) {
@@ -215,9 +220,17 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return terms;
 	}
 
+	@Override
+	public void setStopWords(List<String> stopWords) {
+		this.stopWords = stopWords;
+	}
+
 	private boolean isStopWord(String term) {
-		// TODO Auto-generated method stub
-		return false;
+		if (stopWords == null) {
+			return false;
+		}
+
+		return stopWords.contains(term);
 	}
 
 	private int countQuestionsInClass(List<QuestionInfo> questions,

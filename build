@@ -1,2 +1,3 @@
-javac -cp src/ -d bin/ src/qa/Application.java
+rm -rf bin/*
+javac -cp src/ -d bin/ src/qa/*.java
 ctags -R -f .tags

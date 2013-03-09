@@ -32,17 +32,18 @@ public class ClassifierApplication {
 			return;
 		}
 
-		if (args[0].equals("-train")) {
+		if (args[0].equals("train")) {
 			train();
-		} else if (args[0].equals("-eval")) {
-			evaluate();
+		} else if (args[0].equals("eval")) {
+			evaluate(args);
 		} else {
 			classify(args);
 		}
 
 	}
 
-	private static void evaluate() {
+	private static void evaluate(String[] options) {
+		boolean debug = options.length >= 2 && options[1].equals("-debug");
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QuestionInfo> testData;
 		try {
@@ -54,6 +55,8 @@ public class ClassifierApplication {
 							.getProperty("TEST_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
+			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+							.getProperty("STOPWORD_LIST_PATH")));
 			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
@@ -75,6 +78,8 @@ public class ClassifierApplication {
 
 					if (classified[1].equals(subExpected)) {
 						subCorrect++;
+					} else if (debug) {
+						System.out.printf("-- %-20s ++ %-20s %s\n", subExpected, classified[1], question.getRaw());
 					}
 				}
 
@@ -103,9 +108,11 @@ public class ClassifierApplication {
 		if (trainingInfo != null) {
 			boolean SUPPRESS_LOG = false;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
+			ClassifierHelper helper = ClassifierHelper.getInstance();
+			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+							.getProperty("STOPWORD_LIST_PATH")));
 			for (int i = 0; i < args.length; i++) {
 				String question = args[i];
-				ClassifierHelper helper = ClassifierHelper.getInstance();
 				System.out.printf("\nQ: \"%s\"\n", question);
 				String[] classified = qc.apply(helper.getAllQueryTypes(),
 						helper.getAllQuerySubTypes(), trainingInfo, question);
@@ -121,13 +128,13 @@ public class ClassifierApplication {
 
 	private static void printUsage() {
 		System.out
-				.println("Usage: java ClassifierApplication <options> \"<question1>\" \"<question2>\"... ");
-		System.out.println("where possible options include:");
-		System.out.printf("  %-15s %s\n", "-train",
+				.println("Usage: java ClassifierApplication <command> <options> \"<question1>\" \"<question2>\"... ");
+		System.out.println("where possible commands and options include:");
+		System.out.printf("  %-15s %s\n", "train",
 				"Only train question classifier, no input questions required");
 		System.out
-				.printf("  %-15s %s\n", "-eval",
-						"Only evaluate question classifier, no input questions required");
+				.printf("  %-15s %s\n", "eval [-debug]",
+						"Only evaluate question classifier, no input questions required, optionally print out debug information");
 		System.out.println();
 		System.out
 				.println("Run configuration stored in '/Application.properties'");
@@ -148,6 +155,8 @@ public class ClassifierApplication {
 							.getProperty("TRAIN_CORPUS_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
+			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+							.getProperty("STOPWORD_LIST_PATH")));
 			ClassifierInfo trainingInfo = qc.train(helper.getAllQueryTypes(),
 					helper.getAllQuerySubTypes(), trainingData);
 

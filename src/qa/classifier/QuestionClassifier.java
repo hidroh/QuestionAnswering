@@ -13,4 +13,6 @@ public interface QuestionClassifier {
 
 	String[] apply(List<QueryType> queryTypes, List<QuerySubType> subQueryTypes,
 			ClassifierInfo trainingInfo, String question);
+
+    void setStopWords(List<String> stopWords);
 }
