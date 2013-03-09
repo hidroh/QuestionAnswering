@@ -19,6 +19,8 @@ import qa.helper.ClassifierHelper;
 public class QuestionClassifierImpl implements QuestionClassifier {
 	private boolean suppressLog = false;
 	private List<String> stopWords;
+	private double threshold = 1.0;
+	private int resultLimit = 1;
 
 	public QuestionClassifierImpl(boolean suppressLog) {
 		this.suppressLog = suppressLog;
@@ -152,7 +154,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	private String getClassification(List<String> queryTypes,
 			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
 		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
-				terms, isSubType);		// getArgsMax(score, 0.7, 2);
+				terms, isSubType);
 
 		return getArgMax(score);
 	}
@@ -162,7 +164,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
 				terms, isSubType);
 
-		return getArgsMax(score, 0.7, 2);
+		return getArgsMax(score);
 	}
 
 	private Map<String, Double> calculateScore(List<String> queryTypes,
@@ -229,6 +231,16 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	@Override
 	public void setStopWords(List<String> stopWords) {
 		this.stopWords = stopWords;
+	}
+
+	@Override
+	public void setThreshold(double threshold) {
+		this.threshold = threshold;
+	}
+
+	@Override
+	public void setResultLimit(int resultLimit) {
+		this.resultLimit = resultLimit;
 	}
 
 	private boolean isStopWord(String term) {
@@ -323,8 +335,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return scoreList.get(0).getKey();
 	}
 
-	private List<String> getArgsMax(Map<String, Double> score, double t,
-			int k) {
+	private List<String> getArgsMax(Map<String, Double> score) {
 		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
 				score.entrySet());
 		Collections.sort(scoreList,
@@ -337,10 +348,10 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 				});
 
 		List<String> results = new ArrayList<String>();
-		double threshold = scoreList.get(0).getValue() / t;
+		double scoreThreshold = scoreList.get(0).getValue() / threshold;
 		if (!suppressLog) System.out.print("Possible classes: ");
-		for (int i = 0; i < scoreList.size() && i < k
-				&& scoreList.get(i).getValue() > threshold; i++) {
+		for (int i = 0; i < scoreList.size() && i < resultLimit
+				&& scoreList.get(i).getValue() >= scoreThreshold; i++) {
 			results.add(scoreList.get(i).getKey());
 			if (!suppressLog) System.out.print(scoreList.get(i).getKey() + ", ");
 		}

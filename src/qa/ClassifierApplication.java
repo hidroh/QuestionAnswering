@@ -57,6 +57,10 @@ public class ClassifierApplication {
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
 							.getProperty("STOPWORD_LIST_PATH")));
+			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
+							.getProperty("CLASSIFIER_THRESHOLD")));
+			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
+							.getProperty("CLASSIFIER_LIMIT")));
 			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
@@ -89,7 +93,9 @@ public class ClassifierApplication {
 					if (isSubCorrect) {
 						subCorrect++;
 					} else if (debug) {
-						System.out.printf("-- %-20s ++ [%-30s] %s\n", subExpected, subClassified, question.getRaw());
+						String format = "-- %-20s ++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
+							.getProperty("CLASSIFIER_LIMIT"))) + "s] %s\n";
+						System.out.printf(format, subExpected, subClassified, question.getRaw());
 					}
 				}
 
@@ -121,6 +127,10 @@ public class ClassifierApplication {
 			ClassifierHelper helper = ClassifierHelper.getInstance();
 			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
 							.getProperty("STOPWORD_LIST_PATH")));
+			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
+							.getProperty("CLASSIFIER_THRESHOLD")));
+			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
+							.getProperty("CLASSIFIER_LIMIT")));
 			for (int i = 0; i < args.length; i++) {
 				String question = args[i];
 				System.out.printf("\nQ: \"%s\"\n", question);

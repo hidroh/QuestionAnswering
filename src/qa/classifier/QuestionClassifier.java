@@ -15,4 +15,8 @@ public interface QuestionClassifier {
 			ClassifierInfo trainingInfo, String question);
 
     void setStopWords(List<String> stopWords);
+
+    void setThreshold(double threshold);
+
+    void setResultLimit(int limit);
 }
