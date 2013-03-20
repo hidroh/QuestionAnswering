@@ -15,6 +15,7 @@ import qa.model.QuestionInfo;
 import qa.model.enumerator.QueryType;
 import qa.model.enumerator.QuerySubType;
 import qa.helper.ClassifierHelper;
+import qa.helper.PosTagger;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
 	private boolean suppressLog = false;
@@ -191,6 +192,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 	private List<String> extractQueryTerms(Set<String> vocabulary,
 			String question) {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
+		question = PosTagger.getInstance().tag(question);
 		List<QueryTerm> terms = helper.getQueryTerms(question);
 		List<String> extracted = new ArrayList<String>();
 		if (!suppressLog)

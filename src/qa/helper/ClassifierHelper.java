@@ -89,7 +89,8 @@ public class ClassifierHelper {
 			String queryType = m.group(1);
 			String querySubType = m.group(2);
 			String rawQuestion = m.group(3);
-			List<QueryTerm> terms = getQueryTerms(rawQuestion);
+			List<QueryTerm> terms = getQueryTerms(PosTagger.getInstance().tag(
+					rawQuestion));
 			QuestionInfo questionInfo = new QuestionInfoImpl(
 					QueryType.valueOf(queryType), QuerySubType.valueOf(String
 							.format("%s_%s", queryType, querySubType)), terms,
@@ -103,12 +104,32 @@ public class ClassifierHelper {
 
 	public List<QueryTerm> getQueryTerms(String text) {
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
-		Pattern wordPattern = Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE
-				| Pattern.DOTALL);
+		Pattern wordPattern = Pattern.compile("\\w+_\\w+",
+				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 		Matcher m = wordPattern.matcher(text);
 		while (m.find()) {
-			terms.add(new QueryTermImpl(m.group()));
+			String tagged = m.group();
+
+			Pattern taggedPattern = Pattern.compile("((?:\\w+))_((?:\\w+))",
+					Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+			Matcher taggedMatcher = taggedPattern.matcher(tagged);
+			if (taggedMatcher.find()) {
+				String word = taggedMatcher.group(1);
+				String pos = taggedMatcher.group(2);
+//				if (pos.equals("CD") || pos.equals("NNP") || pos.equals("NNPS")
+//						|| pos.equals("FW")) {
+//					// System.out.print(pos);
+					terms.add(new QueryTermImpl(pos));
+//				} else {
+					// System.out.print(word);
+				if (!(pos.equals("CD") || pos.equals("NNP") || pos.equals("NNPS"))) {
+					terms.add(new QueryTermImpl(word));
+				}
+			}
+
+			// System.out.print(" ");
 		}
+		// System.out.println();
 
 		return terms;
 	}
