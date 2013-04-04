@@ -21,7 +21,7 @@ public class PosTagger {
 						+ File.separator
 						+ "tagger-models"
 						+ File.separator
-						+ "english-bidirectional-distsim.tagger";
+						+ "english-left3words-distsim.tagger";
 //				System.out.println(modelPath);
 				try {
 					tagger = new MaxentTagger(modelPath);

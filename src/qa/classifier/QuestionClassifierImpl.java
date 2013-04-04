@@ -194,6 +194,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		question = PosTagger.getInstance().tag(question);
 		List<QueryTerm> terms = helper.getQueryTerms(question);
+		terms.addAll(helper.getChunks(question));
 		List<String> extracted = new ArrayList<String>();
 		if (!suppressLog)
 			System.out.print("{ ");
