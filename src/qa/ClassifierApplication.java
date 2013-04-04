@@ -62,7 +62,9 @@ public class ClassifierApplication {
 					ClassifierApplication.Settings
 							.getProperty("TEST_CORPUS_PREFIX"),
 					ClassifierApplication.Settings
-							.getProperty("TEST_CORPUS_EXT"));
+							.getProperty("TEST_CORPUS_EXT"),
+					ClassifierApplication.Settings
+							.getProperty("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
@@ -199,7 +201,9 @@ public class ClassifierApplication {
 					ClassifierApplication.Settings
 							.getProperty("TRAIN_CORPUS_PREFIX"),
 					ClassifierApplication.Settings
-							.getProperty("TRAIN_CORPUS_EXT"));
+							.getProperty("TRAIN_CORPUS_EXT"),
+					ClassifierApplication.Settings
+							.getProperty("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
