@@ -84,7 +84,8 @@ public class Application {
 
 			// use search engine to search for possible answers and rank
 			// them
-			List<AnswerInfo> rankedAnswers = searchEngine.search(questionInfo);
+			searchEngine.search(questionInfo); // TODO: use searchEngine in the next line
+			List<AnswerInfo> rankedAnswers = new ArrayList<AnswerInfo>();
 
 			// initialize variables to store answers
 			List<ResultInfo> results = new ArrayList<ResultInfo>();

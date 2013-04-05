@@ -15,5 +15,5 @@ public interface SearchEngine {
 	 * @param question given question
 	 * @return list of ranked answers
 	 */
-	List<AnswerInfo> search(QuestionInfo question);
+	String search(QuestionInfo question);
 }
