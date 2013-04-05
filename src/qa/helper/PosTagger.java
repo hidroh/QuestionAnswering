@@ -1,4 +1,6 @@
 package qa.helper;
+
+import qa.Settings;
 import java.io.File;
 import java.io.IOException;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
@@ -12,11 +14,7 @@ public class PosTagger {
 		boolean instantiated = false;
 		while (!instantiated) {
 			try {
-				String modelPath = "lib"
-						+ File.separator
-						+ "tagger-models"
-						+ File.separator
-						+ "english-left3words-distsim.tagger";
+				String modelPath = Settings.get("POS_TAGGER_MODEL_PATH");
 //				System.out.println(modelPath);
 				try {
 					tagger = new MaxentTagger(modelPath);
