@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/LBJ2Library.jar"/>
 	<classpathentry kind="lib" path="lib/LBJChunk.jar"/>
 	<classpathentry kind="lib" path="lib/LBJPOS.jar"/>
+	<classpathentry kind="lib" path="lib/stanford-ner-2012-11-11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
