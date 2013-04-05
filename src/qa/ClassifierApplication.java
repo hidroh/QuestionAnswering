@@ -140,9 +140,9 @@ public class ClassifierApplication {
 
 	}
 
-	private static void classify(String[] args) {
+	public static String classify(String[] args) {
 		if (args.length == 0) {
-			return;
+			return null;
 		}
 
 		ClassifierInfo trainingInfo = loadClassifier();
@@ -167,12 +167,14 @@ public class ClassifierApplication {
 				}
 				System.out.printf("Classified as: %s:[%s]\n",
 						classified.get(0), subClassified);
-
+				return classified.get(0);
 			}
 		} else {
 			System.err
 					.println("Operation halted, unable to retrieve trained data");
 		}
+
+		return null;
 	}
 
 	private static void printUsage() {
