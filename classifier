@@ -1,1 +1,1 @@
-java -ea -cp "bin/;lib/*" qa.ClassifierApplication "$@"
+java -ea -cp "bin/:lib/*" qa.ClassifierApplication "$@"

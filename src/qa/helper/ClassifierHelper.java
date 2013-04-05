@@ -25,7 +25,7 @@ import qa.model.QuestionInfoImpl;
 import qa.model.enumerator.QueryType;
 import qa.model.enumerator.QuerySubType;
 
-import edu.illinois.cs.cogcomp.lbj.chunk.ChunksAndPOSTags;
+//import edu.illinois.cs.cogcomp.lbj.chunk.ChunksAndPOSTags;
 
 public class ClassifierHelper {
 

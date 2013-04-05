@@ -1,12 +1,9 @@
 package qa;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
+import qa.Settings;
 import qa.extractor.AnswerExtractor;
 import qa.factory.AnswerExtractorFactory;
 import qa.factory.AnswerExtractorFactoryImpl;
@@ -33,14 +30,11 @@ import qa.search.SearchEngine;
 
 public class Application {
 
-	public static Properties Settings;
-
 	/**
 	 * @param args
 	 *            array of input questions
 	 */
 	public static void main(String[] args) {
-		loadProperties();
 		if (args.length == 0) {
 			printUsage();
 			return;
@@ -73,8 +67,7 @@ public class Application {
 		DocumentRetriever documentRetriever = drFactory
 				.createDocumentRetriever();
 		documentRetriever.setIndexer(documentIndexer);
-		documentRetriever.importDocuments(Application.Settings
-				.getProperty("DOCUMENT_PATH"));
+		documentRetriever.importDocuments(Settings.get("DOCUMENT_PATH"));
 
 		// create passage retriever
 		PassageRetrieverFactory prFactory = new PassageRetrieverFactoryImpl();
@@ -140,25 +133,6 @@ public class Application {
 		for (ResultInfo resultInfo : results) {
 			System.out.printf("[%-5s] %s\n", resultInfo.getSupportingDocument()
 					.getId(), resultInfo.getAnswer());
-		}
-	}
-
-	private static void loadProperties() {
-		String propertiesPath = new File(Application.class
-				.getProtectionDomain().getCodeSource().getLocation().getPath())
-				+ File.separator
-				+ ".."
-				+ File.separator
-				+ "Application.properties";
-		Settings = new Properties();
-		try {
-			Settings.load(new FileInputStream(propertiesPath));
-			// for(String key : Settings.stringPropertyNames()) {
-			// String value = Settings.getProperty(key);
-			// System.out.println(key + " => " + value);
-			// }
-		} catch (IOException e) {
-
 		}
 	}
 }

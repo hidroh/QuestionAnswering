@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
+import qa.Settings;
 import qa.classifier.QuestionClassifier;
 import qa.classifier.QuestionClassifierImpl;
 import qa.helper.ClassifierHelper;
@@ -28,14 +28,12 @@ public class ClassifierApplication {
 	public static final String ANSI_PURPLE = "\u001B[35m";
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
-	public static Properties Settings;
 
 	/**
 	 * @param args
 	 *            array of input questions
 	 */
 	public static void main(String[] args) {
-		loadProperties();
 		if (args.length == 0) {
 			printUsage();
 			return;
@@ -57,22 +55,23 @@ public class ClassifierApplication {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QuestionInfo> testData;
 		try {
-			testData = helper.getAnnotatedData(ClassifierApplication.Settings
-					.getProperty("TEST_CORPUS_PATH"),
-					ClassifierApplication.Settings
-							.getProperty("TEST_CORPUS_PREFIX"),
-					ClassifierApplication.Settings
-							.getProperty("TEST_CORPUS_EXT"),
-					ClassifierApplication.Settings
-							.getProperty("CHUNK_EXT"));
+			testData = helper.getAnnotatedData(Settings
+					.get("TEST_CORPUS_PATH"),
+					Settings
+							.get("TEST_CORPUS_PREFIX"),
+					Settings
+							.get("TEST_CORPUS_EXT"),
+					Settings
+							.get("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
-			// 				.getProperty("STOPWORD_LIST_PATH")));
-			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_THRESHOLD")));
-			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_LIMIT")));
+			qc.setStopWords(helper.getStopWords(Settings
+							.get("STOPWORD_LIST_PATH")));
+			qc.setThreshold(Double.parseDouble(Settings
+							.get("CLASSIFIER_THRESHOLD")));
+			qc.setResultLimit(Integer.parseInt(Settings
+							.get("CLASSIFIER_LIMIT")));
+
 			ClassifierInfo trainingInfo = loadClassifier();
 			if (trainingInfo != null) {
 				int correct = 0;
@@ -99,7 +98,7 @@ public class ClassifierApplication {
 						if (classified.get(i).equals(subExpected)) {
 							isSubCorrect = true;
 							break;
-						}
+						} if (i == 1) { break; }
 					}
 
 					if (isSubCorrect) {
@@ -107,11 +106,11 @@ public class ClassifierApplication {
 					} else if (debug) {
 						String format = "";
 						if (color) {
-							format = ANSI_GREEN + "-- %-20s " + ANSI_RED + "++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
-								.getProperty("CLASSIFIER_LIMIT"))) + "s]" + ANSI_RESET + " %s\n";
+							format = ANSI_GREEN + "-- %-20s " + ANSI_RED + "++ [%-" + (15 * Integer.parseInt(Settings
+								.get("CLASSIFIER_LIMIT"))) + "s]" + ANSI_RESET + " %s\n";
 						} else {
-							format = "-- %-20s ++ [%-" + (15 * Integer.parseInt(ClassifierApplication.Settings
-								.getProperty("CLASSIFIER_LIMIT"))) + "s] %s\n";
+							format = "-- %-20s ++ [%-" + (15 * Integer.parseInt(Settings
+								.get("CLASSIFIER_LIMIT"))) + "s] %s\n";
 						}
 						System.out.printf(format, subExpected, subClassified, question.getRaw());
 					}
@@ -143,12 +142,13 @@ public class ClassifierApplication {
 			boolean SUPPRESS_LOG = false;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			ClassifierHelper helper = ClassifierHelper.getInstance();
-			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
-			// 				.getProperty("STOPWORD_LIST_PATH")));
-			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_THRESHOLD")));
-			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_LIMIT")));
+			qc.setStopWords(helper.getStopWords(Settings
+							.get("STOPWORD_LIST_PATH")));
+			qc.setThreshold(Double.parseDouble(Settings
+							.get("CLASSIFIER_THRESHOLD")));
+			qc.setResultLimit(Integer.parseInt(Settings
+							.get("CLASSIFIER_LIMIT")));
+
 			for (int i = 0; i < args.length; i++) {
 				String question = args[i];
 				System.out.printf("\nQ: \"%s\"\n", question);
@@ -196,14 +196,14 @@ public class ClassifierApplication {
 		List<QuestionInfo> trainingData;
 		try {
 			trainingData = helper.getAnnotatedData(
-					ClassifierApplication.Settings
-							.getProperty("TRAIN_CORPUS_PATH"),
-					ClassifierApplication.Settings
-							.getProperty("TRAIN_CORPUS_PREFIX"),
-					ClassifierApplication.Settings
-							.getProperty("TRAIN_CORPUS_EXT"),
-					ClassifierApplication.Settings
-							.getProperty("CHUNK_EXT"));
+					Settings
+							.get("TRAIN_CORPUS_PATH"),
+					Settings
+							.get("TRAIN_CORPUS_PREFIX"),
+					Settings
+							.get("TRAIN_CORPUS_EXT"),
+					Settings
+							.get("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
@@ -213,15 +213,15 @@ public class ClassifierApplication {
 
 			try {
 				File classifierOutput = new File(
-						ClassifierApplication.Settings
-								.getProperty("CLASSIFIER_PATH"));
+						Settings
+								.get("CLASSIFIER_PATH"));
 				if (!classifierOutput.isFile()) {
 					classifierOutput.createNewFile();
 				}
 
 				FileOutputStream f_out = new FileOutputStream(
-						ClassifierApplication.Settings
-								.getProperty("CLASSIFIER_PATH"));
+						Settings
+								.get("CLASSIFIER_PATH"));
 				ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
 				obj_out.writeObject(trainingInfo);
 				obj_out.close();
@@ -241,8 +241,8 @@ public class ClassifierApplication {
 	private static ClassifierInfo loadClassifier() {
 		try {
 			FileInputStream f_in = new FileInputStream(
-					ClassifierApplication.Settings
-							.getProperty("CLASSIFIER_PATH"));
+					Settings
+							.get("CLASSIFIER_PATH"));
 			ObjectInputStream obj_in = new ObjectInputStream(f_in);
 			Object obj = obj_in.readObject();
 			obj_in.close();
@@ -258,21 +258,5 @@ public class ClassifierApplication {
 		}
 
 		return null;
-	}
-
-	private static void loadProperties() {
-		File file = new File("Application.properties");
-		Settings = new Properties();
-		try {
-			Settings.load(new FileInputStream(file));
-			// for(String key : Settings.stringPropertyNames()) {
-			// String value = Settings.getProperty(key);
-			// System.out.println(key + " => " + value);
-			// }
-		} catch (IOException e) {
-			System.err.println(String.format(
-					"Unable to load application settings from %s",
-					file.getAbsolutePath()));
-		}
 	}
 }

@@ -152,13 +152,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return results;
 	}
 
-	private String getClassification(List<String> queryTypes,
-			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
-		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
-				terms, isSubType);
-
-		return getArgMax(score);
-	}
+//	private String getClassification(List<String> queryTypes,
+//			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
+//		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
+//				terms, isSubType);
+//
+//		return getArgMax(score);
+//	}
 
 	private List<String> getMultiClassification(List<String> queryTypes,
 			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
@@ -308,35 +308,35 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return count;
 	}
 
-	private String getArgMax(Map<String, Double> score) {
-		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
-				score.entrySet());
-		Collections.sort(scoreList,
-				new Comparator<Map.Entry<String, Double>>() {
-					public int compare(Map.Entry<String, Double> o1,
-							Map.Entry<String, Double> o2) {
-						return ((Comparable<Double>) o2.getValue())
-								.compareTo(o1.getValue());
-					}
-				});
-
-		if (!suppressLog) {
-			int count = 0;
-			for (Map.Entry<String, Double> e : scoreList) {
-				System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
-				count++;
-				if (count % 3 == 0) {
-					System.out.println();
-				} else {
-					System.out.print("\t");
-				}
-			}
-			
-			System.out.println();
-		}
-
-		return scoreList.get(0).getKey();
-	}
+//	private String getArgMax(Map<String, Double> score) {
+//		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
+//				score.entrySet());
+//		Collections.sort(scoreList,
+//				new Comparator<Map.Entry<String, Double>>() {
+//					public int compare(Map.Entry<String, Double> o1,
+//							Map.Entry<String, Double> o2) {
+//						return ((Comparable<Double>) o2.getValue())
+//								.compareTo(o1.getValue());
+//					}
+//				});
+//
+//		if (!suppressLog) {
+//			int count = 0;
+//			for (Map.Entry<String, Double> e : scoreList) {
+//				System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
+//				count++;
+//				if (count % 3 == 0) {
+//					System.out.println();
+//				} else {
+//					System.out.print("\t");
+//				}
+//			}
+//			
+//			System.out.println();
+//		}
+//
+//		return scoreList.get(0).getKey();
+//	}
 
 	private List<String> getArgsMax(Map<String, Double> score) {
 		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(

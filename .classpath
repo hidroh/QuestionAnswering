@@ -3,5 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/stanford-postagger.jar"/>
+	<classpathentry kind="lib" path="lib/LBJ2Library.jar"/>
+	<classpathentry kind="lib" path="lib/LBJChunk.jar"/>
+	<classpathentry kind="lib" path="lib/LBJPOS.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
