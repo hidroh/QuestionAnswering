@@ -35,7 +35,6 @@ public class ClassifierHelper {
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 	private HashMap<String, ArrayList<String>> semanticClasses;
 
-
 	private ClassifierHelper() {
 
 	}
@@ -52,9 +51,10 @@ public class ClassifierHelper {
 	private void initSemanticClasses() {
 		semanticClasses = new HashMap<String, ArrayList<String>>();
 
-		File folder = new File("/Users/hadt/Dropbox/CS5246 Text Processing on the Web/qc/publish/lists/");
-	    for (File fileEntry : folder.listFiles()) {
-	        String semanticClass = fileEntry.getName();
+		File folder = new File(
+				"/Users/hadt/Dropbox/CS5246 Text Processing on the Web/qc/publish/lists/");
+		for (File fileEntry : folder.listFiles()) {
+			String semanticClass = fileEntry.getName();
 			BufferedReader br = null;
 			try {
 				String line;
@@ -70,11 +70,12 @@ public class ClassifierHelper {
 			} catch (FileNotFoundException e) {
 			} catch (IOException e) {
 			}
-	    }
+		}
 	}
 
 	public List<QuestionInfo> getAnnotatedData(String corpusPath,
-			final String prefix, final String ext, final String chunkExt) throws Exception {
+			final String prefix, final String ext, final String chunkExt)
+			throws Exception {
 		if (corpusPath == null) {
 			throw new Exception("Corpus path is missing");
 		}
@@ -115,9 +116,9 @@ public class ClassifierHelper {
 
 				for (int j = 0; j < lines.size(); j++) {
 					questionCount++;
-					trainingData.add(getQuestionInfo(lines.get(j), chunkLines.get(j)));
+					trainingData.add(getQuestionInfo(lines.get(j),
+							chunkLines.get(j)));
 				}
-
 
 				System.out.printf("Data set: %s [ %d questions]\n",
 						file.getName(), questionCount);
@@ -141,7 +142,7 @@ public class ClassifierHelper {
 			String queryType = m.group(1);
 			String querySubType = m.group(2);
 			String rawQuestion = m.group(3);
-			
+
 			List<QueryTerm> terms = getQueryTerms(PosTagger.getInstance().tag(
 					rawQuestion));
 			terms.addAll(getPreloadedChunks(chunks));
@@ -159,21 +160,22 @@ public class ClassifierHelper {
 	public List<QueryTerm> getChunks(String question) {
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
 
-		// try { 
-		// 	File file = new File("question.txt");
-		// 	// if file doesnt exists, then create it
-		// 	if (!file.exists()) {
-		// 		file.createNewFile();
-		// 	}
- 
-		// 	FileWriter fw = new FileWriter(file.getAbsoluteFile());
-		// 	BufferedWriter bw = new BufferedWriter(fw);
-		// 	bw.write(question);
-		// 	bw.close(); 
+		// try {
+		// File file = new File("question.txt");
+		// // if file doesnt exists, then create it
+		// if (!file.exists()) {
+		// file.createNewFile();
+		// }
 
-		// 	System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream("chunk.txt"))));
-		// 	ChunksAndPOSTags.main(new String[] {"question.txt"});
-		// 	System.setOut(new PrintStream(System.out));
+		// FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		// BufferedWriter bw = new BufferedWriter(fw);
+		// bw.write(question);
+		// bw.close();
+
+		// System.setOut(new PrintStream(new BufferedOutputStream(new
+		// FileOutputStream("chunk.txt"))));
+		// ChunksAndPOSTags.main(new String[] {"question.txt"});
+		// System.setOut(new PrintStream(System.out));
 		// } catch (IOException e) {
 		// }
 
@@ -188,7 +190,9 @@ public class ClassifierHelper {
 		String firstNoun = null;
 		String firstVerb = null;
 		String questionWord = null;
-		ArrayList<String> questionWords = new ArrayList<String>(Arrays.asList(new String[] {"[ADVP How", "[NP What", "[NP Who", "[NP Which", "[ADVP Where", "[ADVP When"}));
+		ArrayList<String> questionWords = new ArrayList<String>(
+				Arrays.asList(new String[] { "[ADVP How", "[NP What",
+						"[NP Who", "[NP Which", "[ADVP Where", "[ADVP When" }));
 		while (m.find()) {
 			String chunk = m.group();
 			if (firstNoun == null || firstVerb == null || questionWord == null) {
@@ -243,17 +247,20 @@ public class ClassifierHelper {
 			if (taggedMatcher.find()) {
 				String word = taggedMatcher.group(1);
 				String pos = taggedMatcher.group(2);
-//				if (pos.equals("CD") || pos.equals("NNP") || pos.equals("NNPS")
-//						|| pos.equals("FW")) {
-//					// System.out.print(pos);
-					terms.add(new QueryTermImpl(pos + "_" + word));
-//				} else {
-					// System.out.print(word);
-				// if (!(pos.equals("CD") || pos.equals("NNP") || pos.equals("NNPS"))) {
-					terms.add(new QueryTermImpl(word));
+				// if (pos.equals("CD") || pos.equals("NNP") ||
+				// pos.equals("NNPS")
+				// || pos.equals("FW")) {
+				// // System.out.print(pos);
+				terms.add(new QueryTermImpl(pos + "_" + word));
+				// } else {
+				// System.out.print(word);
+				// if (!(pos.equals("CD") || pos.equals("NNP") ||
+				// pos.equals("NNPS"))) {
+				terms.add(new QueryTermImpl(word));
 				// }
 
-				ArrayList<String> semClass = getSemanticClass(word.toLowerCase());
+				ArrayList<String> semClass = getSemanticClass(word
+						.toLowerCase());
 				if (semClass != null) {
 					for (String s : semClass) {
 						terms.add(new QueryTermImpl(s));

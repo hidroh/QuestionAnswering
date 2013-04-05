@@ -119,14 +119,15 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		boolean IS_SUB_TYPE = false;
-		// String queryTypeString = getClassification(strQueryTypes, trainingInfo,
-		// 		terms, IS_SUB_TYPE);
-		List<String> classifiedTypes = getMultiClassification(strQueryTypes, trainingInfo,
-				terms, IS_SUB_TYPE);
+		// String queryTypeString = getClassification(strQueryTypes,
+		// trainingInfo,
+		// terms, IS_SUB_TYPE);
+		List<String> classifiedTypes = getMultiClassification(strQueryTypes,
+				trainingInfo, terms, IS_SUB_TYPE);
 
 		// List<String> strQuerySubTypes = new ArrayList<String>();
 		// for (QuerySubType t : querySubTypes) {
-		// 	strQuerySubTypes.add(t.toString());
+		// strQuerySubTypes.add(t.toString());
 		// }
 
 		List<String> strQuerySubTypes = new ArrayList<String>();
@@ -141,10 +142,10 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		IS_SUB_TYPE = true;
 		// String querySubTypeString = getClassification(strQuerySubTypes,
-		// 		trainingInfo, terms, IS_SUB_TYPE);
+		// trainingInfo, terms, IS_SUB_TYPE);
 		// return new String[] { queryTypeString, querySubTypeString };
-		List<String> classifiedSubTypes = getMultiClassification(strQuerySubTypes,
-				trainingInfo, terms, IS_SUB_TYPE);
+		List<String> classifiedSubTypes = getMultiClassification(
+				strQuerySubTypes, trainingInfo, terms, IS_SUB_TYPE);
 
 		List<String> results = new ArrayList<String>();
 		results.add(classifiedTypes.get(0));
@@ -152,13 +153,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return results;
 	}
 
-//	private String getClassification(List<String> queryTypes,
-//			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
-//		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
-//				terms, isSubType);
-//
-//		return getArgMax(score);
-//	}
+	// private String getClassification(List<String> queryTypes,
+	// ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
+	// Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
+	// terms, isSubType);
+	//
+	// return getArgMax(score);
+	// }
 
 	private List<String> getMultiClassification(List<String> queryTypes,
 			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
@@ -308,35 +309,36 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return count;
 	}
 
-//	private String getArgMax(Map<String, Double> score) {
-//		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
-//				score.entrySet());
-//		Collections.sort(scoreList,
-//				new Comparator<Map.Entry<String, Double>>() {
-//					public int compare(Map.Entry<String, Double> o1,
-//							Map.Entry<String, Double> o2) {
-//						return ((Comparable<Double>) o2.getValue())
-//								.compareTo(o1.getValue());
-//					}
-//				});
-//
-//		if (!suppressLog) {
-//			int count = 0;
-//			for (Map.Entry<String, Double> e : scoreList) {
-//				System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
-//				count++;
-//				if (count % 3 == 0) {
-//					System.out.println();
-//				} else {
-//					System.out.print("\t");
-//				}
-//			}
-//			
-//			System.out.println();
-//		}
-//
-//		return scoreList.get(0).getKey();
-//	}
+	// private String getArgMax(Map<String, Double> score) {
+	// List<Map.Entry<String, Double>> scoreList = new
+	// ArrayList<Map.Entry<String, Double>>(
+	// score.entrySet());
+	// Collections.sort(scoreList,
+	// new Comparator<Map.Entry<String, Double>>() {
+	// public int compare(Map.Entry<String, Double> o1,
+	// Map.Entry<String, Double> o2) {
+	// return ((Comparable<Double>) o2.getValue())
+	// .compareTo(o1.getValue());
+	// }
+	// });
+	//
+	// if (!suppressLog) {
+	// int count = 0;
+	// for (Map.Entry<String, Double> e : scoreList) {
+	// System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
+	// count++;
+	// if (count % 3 == 0) {
+	// System.out.println();
+	// } else {
+	// System.out.print("\t");
+	// }
+	// }
+	//
+	// System.out.println();
+	// }
+	//
+	// return scoreList.get(0).getKey();
+	// }
 
 	private List<String> getArgsMax(Map<String, Double> score) {
 		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
@@ -352,14 +354,17 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		List<String> results = new ArrayList<String>();
 		double scoreThreshold = scoreList.get(0).getValue() / threshold;
-		if (!suppressLog) System.out.print("Possible classes: ");
+		if (!suppressLog)
+			System.out.print("Possible classes: ");
 		for (int i = 0; i < scoreList.size() && i < resultLimit
 				&& scoreList.get(i).getValue() >= scoreThreshold; i++) {
 			results.add(scoreList.get(i).getKey());
-			if (!suppressLog) System.out.print(scoreList.get(i).getKey() + ", ");
+			if (!suppressLog)
+				System.out.print(scoreList.get(i).getKey() + ", ");
 		}
-		if (!suppressLog) System.out.println();
-		
+		if (!suppressLog)
+			System.out.println();
+
 		return results;
 	}
 }

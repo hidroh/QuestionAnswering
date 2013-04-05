@@ -14,7 +14,7 @@ public class PosTagger {
 		while (!instantiated) {
 			try {
 				String modelPath = Settings.get("POS_TAGGER_MODEL_PATH");
-//				System.out.println(modelPath);
+				// System.out.println(modelPath);
 				try {
 					tagger = new MaxentTagger(modelPath);
 					instantiated = true;
@@ -24,7 +24,7 @@ public class PosTagger {
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}		
+				}
 			} catch (java.lang.OutOfMemoryError e) {
 				System.err.println("Out of memory! Retrying...");
 				System.gc();
@@ -36,16 +36,16 @@ public class PosTagger {
 		if (instance == null) {
 			instance = new PosTagger();
 		}
-		
+
 		return instance;
 	}
-	
+
 	public String tag(String input) {
 		return tagger.tagString(input);
 	}
-	
-//	public static void main(String[] args) {
-//		System.out.print(PosTagger.getInstance().tag("What county is Modesto , California in ?"));
-//	}
+
+	// public static void main(String[] args) {
+	// System.out.print(PosTagger.getInstance().tag("What county is Modesto , California in ?"));
+	// }
 
 }
