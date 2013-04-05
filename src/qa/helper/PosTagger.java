@@ -1,7 +1,6 @@
 package qa.helper;
 
 import qa.Settings;
-import java.io.File;
 import java.io.IOException;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 

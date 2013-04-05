@@ -29,6 +29,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
+import qa.Settings;
 //import qa.indexer.DocumentIndexer;
 //import qa.model.Document;
 //import qa.model.QueryTerm;
@@ -43,7 +44,7 @@ public class LuceneIndexer {
 			e.printStackTrace();
 		}
 
-		importDocuments("C:\\Users\\Vladan\\Documents\\TREC Dataset");
+		importDocuments(Settings.get("DOCUMENT_PATH"));
 		String debug = "lenihan";
 
 		List<String> ans = getDocuments(debug);
@@ -186,7 +187,7 @@ public class LuceneIndexer {
 	static IndexWriter iw;
 	static StandardAnalyzer sa = new StandardAnalyzer(Version.LUCENE_41);
 	static Directory dir;
-	static String DIRECTORY_PATH = "C:/Users/Vladan/Documents/TREC Index sample";
+	static String DIRECTORY_PATH = Settings.get("INDEX_PATH");
 
 	public static void importDocuments(String documentPath) {
 
