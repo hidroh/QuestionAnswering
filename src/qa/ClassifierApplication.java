@@ -67,8 +67,8 @@ public class ClassifierApplication {
 							.getProperty("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
-							.getProperty("STOPWORD_LIST_PATH")));
+			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+			// 				.getProperty("STOPWORD_LIST_PATH")));
 			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
 							.getProperty("CLASSIFIER_THRESHOLD")));
 			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
@@ -143,8 +143,8 @@ public class ClassifierApplication {
 			boolean SUPPRESS_LOG = false;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
 			ClassifierHelper helper = ClassifierHelper.getInstance();
-			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
-							.getProperty("STOPWORD_LIST_PATH")));
+			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+			// 				.getProperty("STOPWORD_LIST_PATH")));
 			qc.setThreshold(Double.parseDouble(ClassifierApplication.Settings
 							.getProperty("CLASSIFIER_THRESHOLD")));
 			qc.setResultLimit(Integer.parseInt(ClassifierApplication.Settings
@@ -206,8 +206,8 @@ public class ClassifierApplication {
 							.getProperty("CHUNK_EXT"));
 			boolean SUPPRESS_LOG = true;
 			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
-							.getProperty("STOPWORD_LIST_PATH")));
+			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
+			// 				.getProperty("STOPWORD_LIST_PATH")));
 			ClassifierInfo trainingInfo = qc.train(helper.getAllQueryTypes(),
 					helper.getAllQuerySubTypes(), trainingData);
 
@@ -261,15 +261,10 @@ public class ClassifierApplication {
 	}
 
 	private static void loadProperties() {
-		String propertiesPath = new File(ClassifierApplication.class
-				.getProtectionDomain().getCodeSource().getLocation().getPath())
-				+ File.separator
-				+ ".."
-				+ File.separator
-				+ "Application.properties";
+		File file = new File("Application.properties");
 		Settings = new Properties();
 		try {
-			Settings.load(new FileInputStream(propertiesPath));
+			Settings.load(new FileInputStream(file));
 			// for(String key : Settings.stringPropertyNames()) {
 			// String value = Settings.getProperty(key);
 			// System.out.println(key + " => " + value);
@@ -277,7 +272,7 @@ public class ClassifierApplication {
 		} catch (IOException e) {
 			System.err.println(String.format(
 					"Unable to load application settings from %s",
-					propertiesPath));
+					file.getAbsolutePath()));
 		}
 	}
 }

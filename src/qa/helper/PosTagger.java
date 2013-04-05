@@ -12,12 +12,7 @@ public class PosTagger {
 		boolean instantiated = false;
 		while (!instantiated) {
 			try {
-				String modelPath = new File(PosTagger.class.getProtectionDomain()
-						.getCodeSource().getLocation().getPath())
-						+ File.separator
-						+ ".."
-						+ File.separator
-						+ "lib"
+				String modelPath = "lib"
 						+ File.separator
 						+ "tagger-models"
 						+ File.separator
