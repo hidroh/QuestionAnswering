@@ -13,7 +13,14 @@ public class IndexerApplication {
     public static void main(String[] args) {
         DocumentIndexer indexer = new LuceneIndexer();
         if (!indexer.hasIndexData(Settings.get("INDEX_PATH"))) {
-            indexer.indexDocuments(Settings.get("DOCUMENT_PATH"));  
+            try {
+                indexer.indexDocuments(Settings.get("DOCUMENT_PATH"));    
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                return;
+            }
+        } else {
+            System.out.println("Indexed data exists. To query, run 'java qa.IndexerApplication \"your query\"'");
         }
 
         DocumentRetrieverImpl retriever = new DocumentRetrieverImpl();

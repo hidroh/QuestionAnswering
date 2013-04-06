@@ -67,7 +67,8 @@ public class Application {
 
 		// index documents if they have not been indexed
 		if (!documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
-			documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));	
+			System.err.println("[WARNING] No indexed data found, please check configuration or run IndexerApplication.");
+			// documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));
 		}
 
 		// init passage retriever factory
@@ -86,8 +87,10 @@ public class Application {
 			String irQuery = searchEngine.search(questionInfo);
 
 			// get set of relevant documents based on reformulated query
-			List<Document> relevantDocs = documentRetriever
-					.getDocuments(irQuery);
+			List<Document> relevantDocs = new ArrayList<Document>();
+			if (documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
+				relevantDocs = documentRetriever.getDocuments(irQuery);
+			}
 
 			// initialize variables to store answers
 			List<ResultInfo> results = new ArrayList<ResultInfo>();
@@ -114,7 +117,7 @@ public class Application {
 
 	private static void printUsage() {
 		System.out
-				.println("Usage: java Application <options> \"<question1>\" \"<question2>\"... ");
+				.println("Usage: java qa.Application <options> \"<question1>\" \"<question2>\"... ");
 		System.out.println();
 		System.out
 				.println("Run configuration stored in 'Application.properties'");

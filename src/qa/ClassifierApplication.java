@@ -218,7 +218,7 @@ public class ClassifierApplication {
 
 	private static void printUsage() {
 		System.out
-				.println("Usage: java ClassifierApplication <command> <options> \"<question1>\" \"<question2>\"... ");
+				.println("Usage: java qa.ClassifierApplication <command> <options> \"<question1>\" \"<question2>\"... ");
 		System.out.println("Available commands:");
 		System.out.printf("  %-15s %s\n", "train",
 				"Only train question classifier, no input questions required");

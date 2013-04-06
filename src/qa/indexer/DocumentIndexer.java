@@ -9,7 +9,7 @@ public interface DocumentIndexer {
      * Imports document sets to be queried upon
      * @param documentPath path to root folder that contains all documents
      */
-    void indexDocuments(String documentPath);
+    void indexDocuments(String documentPath) throws Exception;
 
     boolean hasIndexData(String indexPath);
 }

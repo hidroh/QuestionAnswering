@@ -51,10 +51,14 @@ public class LuceneIndexer implements DocumentIndexer {
 	 * @param documentPath
 	 *            The location of the AQUAINT corpus folder
 	 */
-	public void indexDocuments(String documentPath) {
+	public void indexDocuments(String documentPath) throws Exception {
+		File documentDir = new File(documentPath);
+		if (!(documentDir.exists() && documentDir.isDirectory())) {
+			throw new Exception("Unable to find document directory.");
+		}
 
 		Collection<File> allDocs = new ArrayList<File>();
-		addFiles(new File(documentPath), allDocs);
+		addFiles(documentDir, allDocs);
 		//addFiles(new File("C:/Users/Vladan/Documents/trec sample"), allDocs);
 		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
 
