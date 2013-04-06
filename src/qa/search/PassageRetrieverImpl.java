@@ -157,9 +157,16 @@ public class PassageRetrieverImpl implements PassageRetriever {
             topHits = collector.topDocs().scoreDocs;
 
             System.out.printf("Found %d passage hits\n", topHits.length);
+            float cutOffScore = -1;
+            if (topHits.length > 0) {
+                cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
+                System.out.printf("Cut off score = %f\n", cutOffScore);
+            }
             for (int i = 0; i < topHits.length; ++i) {                
                 Document d = is.doc(topHits[i].doc);
-                System.out.println("----------\n" + d.get("PASSAGE"));
+                if (topHits[i].score >= cutOffScore) {
+                    System.out.printf("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE"));
+                }
             }
         } catch (Exception e) {
         }
