@@ -5,5 +5,11 @@ package qa.indexer;
  * and more efficient retrieval
  */
 public interface DocumentIndexer {
-    void importDocuments(String documentPath);
+    /**
+     * Imports document sets to be queried upon
+     * @param documentPath path to root folder that contains all documents
+     */
+    void indexDocuments(String documentPath);
+
+    boolean hasIndexData(String indexPath);
 }

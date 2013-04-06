@@ -61,13 +61,15 @@ public class Application {
 		DocumentIndexerFactory diFactory = new DocumentIndexerFactoryImpl();
 		DocumentIndexer documentIndexer = diFactory.createDocumentIndexer();
 
-		// create document retriever, associate it with document indexer and
-		// import data set
+		// create document retriever
 		DocumentRetrieverFactory drFactory = new DocumentRetrieverFactoryImpl();
 		DocumentRetriever documentRetriever = drFactory
 				.createDocumentRetriever();
-		documentRetriever.setIndexer(documentIndexer);
-		documentRetriever.importDocuments(Settings.get("DOCUMENT_PATH"));
+
+		// index documents if they have not been indexed
+		if (!documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
+			documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));	
+		}
 
 		// create passage retriever
 		PassageRetrieverFactory prFactory = new PassageRetrieverFactoryImpl();

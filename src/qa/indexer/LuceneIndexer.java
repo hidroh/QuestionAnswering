@@ -14,41 +14,44 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.util.Version;
+import org.apache.lucene.store.MMapDirectory;
 
 import qa.Settings;
-//import qa.model.Document;
-//import qa.model.QueryTerm;
 
 public class LuceneIndexer implements DocumentIndexer {
+	private IndexWriter iw;
+	private StandardAnalyzer sa;
+	private Directory dir;
+	private final String DELIMETER = ".";
 
-	public static void main(String[] args) {
+	public LuceneIndexer() {
+		sa = new StandardAnalyzer(Version.LUCENE_41);
 		try {
-			dir = new MMapDirectory(new File(DIRECTORY_PATH));
+			dir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Unable to init indexed directory");
 		}
-
-		// importDocuments(Settings.get("DOCUMENT_PATH"));
-		// String debug = "lenihan";
-
-		// List<String> ans = getDocuments(debug);
 	}
 
-	static int NUM_HITS = 10; // Number of hits to be displayed
+	@Override
+	public boolean hasIndexData(String indexPath) {
+		File file = new File(Settings.get("INDEX_PATH"));
+		if(file.isDirectory()){
+			if(file.list().length > 0) {
+				return true;
+			}
+		}
 
+		return false;
+	}
+
+	@Override
 	/**
 	 * @param documentPath
 	 *            The location of the AQUAINT corpus folder
 	 */
-	static IndexWriter iw;
-	static StandardAnalyzer sa = new StandardAnalyzer(Version.LUCENE_41);
-	static Directory dir;
-	static String DIRECTORY_PATH = Settings.get("INDEX_PATH");
-
-	public void importDocuments(String documentPath) {
+	public void indexDocuments(String documentPath) {
 
 		Collection<File> allDocs = new ArrayList<File>();
 		addFiles(new File(documentPath), allDocs);
@@ -56,7 +59,6 @@ public class LuceneIndexer implements DocumentIndexer {
 		IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
 
 		try {
-
 			iw = new IndexWriter(dir, config);
 			for (File file : allDocs) {
 				parseFile(file);
@@ -69,7 +71,7 @@ public class LuceneIndexer implements DocumentIndexer {
 
 	// TODO Every paragraph will contain name of the document where it came from
 	// and classified text. Decide if to include further information
-	private static void parseFile(File file) throws IOException {
+	private void parseFile(File file) throws IOException {
 		Scanner scanner = new Scanner(file);
 		Document doc = null;
 		String docno = null;
@@ -211,10 +213,7 @@ public class LuceneIndexer implements DocumentIndexer {
 	 * @param documentPath
 	 * @param allDocs
 	 */
-
-	static String DELIMETER = ".";
-
-	private static void addFiles(File documentPath, Collection<File> allDocs) {
+	private void addFiles(File documentPath, Collection<File> allDocs) {
 		File[] children = documentPath.listFiles();
 
 		if (children != null) {

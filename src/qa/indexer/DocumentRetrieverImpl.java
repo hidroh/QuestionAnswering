@@ -8,8 +8,10 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -19,21 +21,25 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.MMapDirectory;
 
+import qa.Settings;
 import qa.model.QueryTerm;
 import qa.search.DocumentRetriever;
 
 public class DocumentRetrieverImpl implements DocumentRetriever {
-	private DocumentIndexer indexer;
+	private StandardAnalyzer sa;
+	private Directory indexDir;
+	private int NUM_HITS; // Number of hits to be displayed
 
-	// TODO remove
-	static StandardAnalyzer sa = new StandardAnalyzer(Version.LUCENE_41);
-	static Directory dir;
-	static int NUM_HITS = 10; // Number of hits to be displayed
-
-	@Override
-	public void setIndexer(DocumentIndexer indexer) {
-		this.indexer = indexer;
+	public DocumentRetrieverImpl() {
+		NUM_HITS = Integer.parseInt(Settings.get("DOCUMENT_HITS"));
+		sa = new StandardAnalyzer(Version.LUCENE_41);
+		try {
+			indexDir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
+		} catch (IOException e) {
+			System.err.println("Unable to load indexed data");
+		}
 	}
 
 	@Override
@@ -43,8 +49,11 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 	}
 
 
-	private List<String> getDocuments(String queryString) { // List<QueryTerm>
+	public List<String> getDocuments(String queryString) { // List<QueryTerm>
 																	// query
+		if (indexDir == null) {
+			return new ArrayList<String>();
+		}
 
 		List<String> result = new ArrayList<String>();
 		HashMap<String, Integer> docHits = new HashMap<String, Integer>();
@@ -54,7 +63,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			Query query = new QueryParser(Version.LUCENE_41, "TEXT", sa)
 					.parse(queryString);
 
-			IndexReader ir = IndexReader.open(dir);
+			IndexReader ir = DirectoryReader.open(indexDir);
 			IndexSearcher is = new IndexSearcher(ir);
 			TopScoreDocCollector collector = TopScoreDocCollector.create(
 					NUM_HITS, true);
@@ -158,17 +167,13 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 							sb.append(next.replace("</TEXT>", "").replace("<P>", "").replace("</P>", ""));
 							sb.append("\n");
 						}
+						scanner.close();
 						return sb.toString().trim();
 					}
 				}
 			}
 		}
+		scanner.close();
 		return null;
 	}
-
-	@Override
-	public void importDocuments(String documentPath) {
-		indexer.importDocuments(documentPath);
-	}
-
 }
