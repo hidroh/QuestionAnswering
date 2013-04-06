@@ -1,13 +1,13 @@
 package qa.factory;
 
 import qa.extractor.AnswerExtractor;
+import qa.extractor.AnswerExtractorImpl;
 
 public class AnswerExtractorFactoryImpl implements AnswerExtractorFactory {
 
 	@Override
 	public AnswerExtractor createAnswerExtractor() {
-		// TODO Auto-generated method stub
-		return null;
+		return new AnswerExtractorImpl();
 	}
 
 }

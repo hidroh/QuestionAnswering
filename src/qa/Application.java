@@ -84,37 +84,28 @@ public class Application {
 			// parse question to get expanded query and query type
 			QuestionInfo questionInfo = questionParser.parse(question);
 
-			// use search engine to search for possible answers and rank
-			// them
-			searchEngine.search(questionInfo); // TODO: use searchEngine in the
-												// next line
-			List<AnswerInfo> rankedAnswers = new ArrayList<AnswerInfo>();
+			// use search engine to reformulate original query
+			String irQuery = searchEngine.search(questionInfo);
+
+			// get set of relevant documents based on reformulated query
+			List<Document> relevantDocs = documentRetriever
+					.getDocuments(irQuery);
 
 			// initialize variables to store answers
 			List<ResultInfo> results = new ArrayList<ResultInfo>();
 
-			// for each answer returned from search engine, we try to
-			// project
-			// it to given data set by doing document retrieval using terms
-			// from the answer
-			for (AnswerInfo answerInfo : rankedAnswers) {
-				// get set of relevant documents based on answer query
-				List<Document> relevantDocs = documentRetriever
-						.getDocuments(answerInfo.getAnswerTerms());
-
-				// from this set of document, narrow down result set by
-				// filter
-				// only passages that possibly contain answer type
-				List<Passage> relevantPassages = new ArrayList<Passage>();
-				for (Document document : relevantDocs) {
-					relevantPassages.addAll(passageRetriever.getPassages(
-							document, answerInfo));
-				}
-
-				// extract ranked answers from relevant passages
-				results.addAll(answerExtractor.extractAnswer(relevantPassages,
-						questionInfo, answerInfo));
+			// from this set of document, narrow down result set by
+			// filtering
+			// only passages that possibly contain answer type
+			List<Passage> relevantPassages = new ArrayList<Passage>();
+			for (Document document : relevantDocs) {
+				relevantPassages.addAll(passageRetriever.getPassages(
+						document, irQuery));
 			}
+
+			// extract ranked answers from relevant passages
+			results.addAll(answerExtractor.extractAnswer(relevantPassages,
+					questionInfo, irQuery));
 
 			// print out results for this question
 			printResults(question, results);

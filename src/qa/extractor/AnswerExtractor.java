@@ -2,7 +2,6 @@ package qa.extractor;
 
 import java.util.List;
 
-import qa.model.AnswerInfo;
 import qa.model.Passage;
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
@@ -22,5 +21,5 @@ public interface AnswerExtractor {
 	 */
 	List<ResultInfo> extractAnswer(List<Passage> passages, 
 			QuestionInfo questionInfo,
-			AnswerInfo answerInfo);
+			String answerInfo);
 }

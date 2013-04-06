@@ -2,7 +2,6 @@ package qa.search;
 
 import java.util.List;
 
-import qa.model.AnswerInfo;
 import qa.model.Document;
 import qa.model.Passage;
 
@@ -18,5 +17,5 @@ public interface PassageRetriever {
 	 * @param answerInfo query information
 	 * @return list of ranked relevant passages
 	 */
-	List<Passage> getPassages(Document document, AnswerInfo answerInfo);
+	List<Passage> getPassages(Document document, String answerInfo);
 }

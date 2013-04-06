@@ -43,16 +43,10 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 	}
 
 	@Override
-	public List<qa.model.Document> getDocuments(List<QueryTerm> query) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	public List<String> getDocuments(String queryString) { // List<QueryTerm>
+	public List<qa.model.Document> getDocuments(String queryString) { // List<QueryTerm>
 																	// query
 		if (indexDir == null) {
-			return new ArrayList<String>();
+			return new ArrayList<qa.model.Document>();
 		}
 
 		List<String> result = new ArrayList<String>();
@@ -99,7 +93,10 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		}
 
 		// result contains the paragraphs with the hits
-		return printResult(result, docHits);
+		printResult(result, docHits);
+
+		// TODO
+		return new ArrayList<qa.model.Document>();
 	}
 
 	private ArrayList<String> printResult(List<String> result, HashMap<String, Integer> map) {

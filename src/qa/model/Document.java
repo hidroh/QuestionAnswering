@@ -9,4 +9,6 @@ public interface Document {
 	 * @return ID of this document
 	 */
 	String getId();
+
+    String getContent();
 }
