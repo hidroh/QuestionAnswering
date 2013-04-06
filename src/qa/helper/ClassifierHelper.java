@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.HashMap;
 
+import qa.Settings;
 import qa.model.QueryTerm;
 import qa.model.QueryTermImpl;
 import qa.model.QuestionInfo;
@@ -52,7 +53,7 @@ public class ClassifierHelper {
 		semanticClasses = new HashMap<String, ArrayList<String>>();
 
 		File folder = new File(
-				"/Users/hadt/Dropbox/CS5246 Text Processing on the Web/qc/publish/lists/");
+				Settings.get("SEMANTIC_CLASS_PATH"));
 		for (File fileEntry : folder.listFiles()) {
 			String semanticClass = fileEntry.getName();
 			BufferedReader br = null;
