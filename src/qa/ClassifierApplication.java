@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import qa.helper.ApplicationHelper;
 import qa.model.enumerator.QueryType;
 import qa.model.enumerator.QuerySubType;
 import qa.model.QuestionInfoImpl;
@@ -65,8 +66,7 @@ public class ClassifierApplication {
 					Settings.get("TEST_CORPUS_PATH"),
 					Settings.get("TEST_CORPUS_PREFIX"),
 					Settings.get("TEST_CORPUS_EXT"), Settings.get("CHUNK_EXT"));
-			boolean SUPPRESS_LOG = true;
-			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
+			QuestionClassifier qc = new QuestionClassifierImpl();
 			qc.setStopWords(helper.getStopWords(Settings
 					.get("STOPWORD_LIST_PATH")));
 			qc.setThreshold(Double.parseDouble(Settings
@@ -125,8 +125,9 @@ public class ClassifierApplication {
 											.get("CLASSIFIER_LIMIT")))
 									+ "s] %s\n";
 						}
-						System.out.printf(format, subExpected, subClassified,
-								question.getRaw());
+						ApplicationHelper.printDebug(
+							String.format(format, subExpected, subClassified,
+								question.getRaw()));
 					}
 				}
 
@@ -187,8 +188,7 @@ public class ClassifierApplication {
 	}
 
 	private static void setClassifier() {
-		boolean SUPPRESS_LOG = false;
-		classifier = new QuestionClassifierImpl(SUPPRESS_LOG);
+		classifier = new QuestionClassifierImpl();
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		classifier.setStopWords(helper.getStopWords(Settings
 				.get("STOPWORD_LIST_PATH")));
@@ -245,8 +245,7 @@ public class ClassifierApplication {
 							Settings.get("TRAIN_CORPUS_PREFIX"),
 							Settings.get("TRAIN_CORPUS_EXT"),
 							Settings.get("CHUNK_EXT"));
-			boolean SUPPRESS_LOG = true;
-			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
+			QuestionClassifier qc = new QuestionClassifierImpl();
 			// qc.setStopWords(helper.getStopWords(ClassifierApplication.Settings
 			// .getProperty("STOPWORD_LIST_PATH")));
 			ClassifierInfo trainingInfo = qc.train(helper.getAllQueryTypes(),

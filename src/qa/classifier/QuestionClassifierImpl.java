@@ -16,15 +16,14 @@ import qa.model.enumerator.QueryType;
 import qa.model.enumerator.QuerySubType;
 import qa.helper.ClassifierHelper;
 import qa.helper.PosTagger;
+import qa.helper.ApplicationHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
-	private boolean suppressLog = false;
 	private List<String> stopWords;
 	private double threshold = 1.0;
 	private int resultLimit = 1;
 
-	public QuestionClassifierImpl(boolean suppressLog) {
-		this.suppressLog = suppressLog;
+	public QuestionClassifierImpl() {
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 			Map<String, Map<String, Double>> condProb, int n, boolean isSubType) {
 		double test_sum_prior = 0;
 		for (String c : queryTypes) {
-			System.out.println(String.format("c = %s", c));
+			ApplicationHelper.printDebug(String.format("c = %s\n", c));
 			int sum_t_ct = 0;
 			int n_c = countQuestionsInClass(questions, c, isSubType);
 			prior.put(c, (double) n_c / n);
@@ -153,14 +152,6 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return results;
 	}
 
-	// private String getClassification(List<String> queryTypes,
-	// ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
-	// Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
-	// terms, isSubType);
-	//
-	// return getArgMax(score);
-	// }
-
 	private List<String> getMultiClassification(List<String> queryTypes,
 			ClassifierInfo trainingInfo, List<String> terms, boolean isSubType) {
 		Map<String, Double> score = calculateScore(queryTypes, trainingInfo,
@@ -197,7 +188,7 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		List<QueryTerm> terms = helper.getQueryTerms(question);
 		terms.addAll(helper.getChunks(question));
 		List<String> extracted = new ArrayList<String>();
-		if (!suppressLog)
+		if (ApplicationHelper.SHOW_DEBUG)
 			System.out.print("{ ");
 		for (QueryTerm queryTerm : terms) {
 			String term = queryTerm.getText();
@@ -205,13 +196,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 				continue;
 			}
 
-			if (!suppressLog)
+			if (ApplicationHelper.SHOW_DEBUG)
 				System.out.print(term + ", ");
 			if (vocabulary.contains(term)) {
 				extracted.add(term);
 			}
 		}
-		if (!suppressLog)
+		if (ApplicationHelper.SHOW_DEBUG)
 			System.out.println(" }");
 
 		return extracted;
@@ -309,37 +300,6 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		return count;
 	}
 
-	// private String getArgMax(Map<String, Double> score) {
-	// List<Map.Entry<String, Double>> scoreList = new
-	// ArrayList<Map.Entry<String, Double>>(
-	// score.entrySet());
-	// Collections.sort(scoreList,
-	// new Comparator<Map.Entry<String, Double>>() {
-	// public int compare(Map.Entry<String, Double> o1,
-	// Map.Entry<String, Double> o2) {
-	// return ((Comparable<Double>) o2.getValue())
-	// .compareTo(o1.getValue());
-	// }
-	// });
-	//
-	// if (!suppressLog) {
-	// int count = 0;
-	// for (Map.Entry<String, Double> e : scoreList) {
-	// System.out.printf("  %-20s => %.2f", e.getKey(), e.getValue());
-	// count++;
-	// if (count % 3 == 0) {
-	// System.out.println();
-	// } else {
-	// System.out.print("\t");
-	// }
-	// }
-	//
-	// System.out.println();
-	// }
-	//
-	// return scoreList.get(0).getKey();
-	// }
-
 	private List<String> getArgsMax(Map<String, Double> score) {
 		List<Map.Entry<String, Double>> scoreList = new ArrayList<Map.Entry<String, Double>>(
 				score.entrySet());
@@ -354,15 +314,15 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		List<String> results = new ArrayList<String>();
 		double scoreThreshold = scoreList.get(0).getValue() / threshold;
-		if (!suppressLog)
+		if (ApplicationHelper.SHOW_DEBUG)
 			System.out.print("Possible classes: ");
 		for (int i = 0; i < scoreList.size() && i < resultLimit
 				&& scoreList.get(i).getValue() >= scoreThreshold; i++) {
 			results.add(scoreList.get(i).getKey());
-			if (!suppressLog)
+			if (ApplicationHelper.SHOW_DEBUG)
 				System.out.print(scoreList.get(i).getKey() + ", ");
 		}
-		if (!suppressLog)
+		if (ApplicationHelper.SHOW_DEBUG)
 			System.out.println();
 
 		return results;

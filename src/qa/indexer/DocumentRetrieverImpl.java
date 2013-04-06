@@ -23,6 +23,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 
+import qa.helper.ApplicationHelper;
 import qa.Settings;
 import qa.model.QueryTerm;
 import qa.search.DocumentRetriever;
@@ -98,8 +99,10 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 
 	private List<qa.model.Document> printResult(List<String> result, HashMap<String, Integer> map) {
 		int i = 0;
-		for (String s : result) {
-			System.out.println(++i + ": " + s);
+		if (ApplicationHelper.SHOW_DEBUG) {
+			for (String s : result) {
+				System.out.println(++i + ": " + s);
+			}			
 		}
 		
 		ValueComparator bvc = new ValueComparator(map);
@@ -110,13 +113,13 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		Map.Entry<String, Integer> entry = sortedMap.firstEntry();
 		String val = entry.getKey();
 		int hits = entry.getValue();
-		System.out.println(val + " "+ hits);
+		ApplicationHelper.printDebug(val + " "+ hits + "\n");
 		
-		System.out.println(sortedMap.remove(val));
+		// System.out.println(sortedMap.remove(val));
 		
 		ArrayList<String> ans = new ArrayList<String>();
 		ans.add(val);
-		System.out.println(sortedMap);
+		// System.out.println(sortedMap);
 		
 		// while next entry is within 90% of this one, return it aswell
 		while (!sortedMap.isEmpty()){

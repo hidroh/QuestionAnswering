@@ -332,9 +332,9 @@ public class ClassifierHelper {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("[WARNING] Unable to find stopword list");
+			System.err.println("[WARNING] Unable to find stopword list");
 		} catch (IOException e) {
-			System.out.println("[WARNING] Unable to read stopword list");
+			System.err.println("[WARNING] Unable to read stopword list");
 		}
 
 		return stopWords;
