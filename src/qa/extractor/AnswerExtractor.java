@@ -2,7 +2,6 @@ package qa.extractor;
 
 import java.util.List;
 
-import qa.model.Passage;
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
 
@@ -19,7 +18,7 @@ public interface AnswerExtractor {
 	 * @param answerInfo answer information
 	 * @return list of ranked results
 	 */
-	List<ResultInfo> extractAnswer(List<Passage> passages, 
+	List<ResultInfo> extractAnswer(List<String> passages, 
 			QuestionInfo questionInfo,
 			String answerInfo);
 }

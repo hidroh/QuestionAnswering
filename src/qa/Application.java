@@ -19,7 +19,6 @@ import qa.factory.SearchEngineFactory;
 import qa.factory.SearchEngineFactoryImpl;
 import qa.indexer.DocumentIndexer;
 import qa.model.Document;
-import qa.model.Passage;
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
 import qa.parser.QuestionParser;
@@ -80,10 +79,10 @@ public class Application {
 		// get answers for each input question
 		for (String question : args) {
 			// parse question to get expanded query and query type
-			QuestionInfo questionInfo = questionParser.parse(question);
+			QuestionInfo questionInfo = null;//questionParser.parse(question);
 
 			// use search engine to reformulate original query
-			String irQuery = searchEngine.search(questionInfo);
+			String irQuery = "london killed vietnam people war ";//searchEngine.search(questionInfo);
 
 			// get set of relevant documents based on reformulated query
 			List<Document> relevantDocs = documentRetriever
@@ -95,7 +94,7 @@ public class Application {
 			// from this set of document, narrow down result set by
 			// filtering
 			// only passages that possibly contain answer type
-			List<Passage> relevantPassages = new ArrayList<Passage>();
+			List<String> relevantPassages = new ArrayList<String>();
 			for (Document document : relevantDocs) {
 				// create passage retriever
 				PassageRetriever passageRetriever = prFactory.createPassageRetriever(document);

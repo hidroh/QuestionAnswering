@@ -27,7 +27,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
 
 import qa.Settings;
-import qa.model.Passage;
 
 public class PassageRetrieverImpl implements PassageRetriever {
     private IndexWriter iw;
@@ -62,14 +61,14 @@ public class PassageRetrieverImpl implements PassageRetriever {
     }
 
     @Override
-    public List<Passage> getPassages(String answerInfo) {
+    public List<String> getPassages(String answerInfo) {
         if (!hasIndexData()) {
             indexDocument();
         }
 
         query(answerInfo);
 
-        return new ArrayList<Passage>();
+        return new ArrayList<String>();
     }
 
     private boolean hasIndexData() {
