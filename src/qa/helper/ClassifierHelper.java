@@ -52,8 +52,7 @@ public class ClassifierHelper {
 	private void initSemanticClasses() {
 		semanticClasses = new HashMap<String, ArrayList<String>>();
 
-		File folder = new File(
-				Settings.get("SEMANTIC_CLASS_PATH"));
+		File folder = new File(Settings.get("SEMANTIC_CLASS_PATH"));
 		for (File fileEntry : folder.listFiles()) {
 			String semanticClass = fileEntry.getName();
 			BufferedReader br = null;
@@ -278,16 +277,26 @@ public class ClassifierHelper {
 
 	public List<QueryTerm> getSearchEngineQueryTerms(String text) {
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
-		Pattern wordPattern = Pattern.compile("\\w+",
-				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Pattern wordPattern = Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE
+				| Pattern.DOTALL);
 		Matcher m = wordPattern.matcher(text);
 		while (m.find()) {
 			String word = m.group();
-
-			terms.add(new QueryTermImpl(word));
+			if (!isQuestionWord(word)) {
+				terms.add(new QueryTermImpl(word));
+			}
 		}
 
 		return terms;
+	}
+
+	private static final List<String> questionWords = new ArrayList<String>(
+			Arrays.asList(new String[] { "who", "whom", "what", "when",
+					"where", "how", "which" }));
+
+	private boolean isQuestionWord(String word) {
+		word = word.toLowerCase();
+		return questionWords.contains(word);
 	}
 
 	private ArrayList<String> getSemanticClass(String word) {
