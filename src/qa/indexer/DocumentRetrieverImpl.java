@@ -93,13 +93,10 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		}
 
 		// result contains the paragraphs with the hits
-		printResult(result, docHits);
-
-		// TODO
-		return new ArrayList<qa.model.Document>();
+		return printResult(result, docHits);
 	}
 
-	private ArrayList<String> printResult(List<String> result, HashMap<String, Integer> map) {
+	private List<qa.model.Document> printResult(List<String> result, HashMap<String, Integer> map) {
 		int i = 0;
 		for (String s : result) {
 			System.out.println(++i + ": " + s);
@@ -133,17 +130,18 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			//System.out.println(sortedMap.size());
 		}
 		
-		ArrayList<String> documentList = new ArrayList<String>();
+		List<qa.model.Document> documentList = new ArrayList<qa.model.Document>();
 		for (String s : ans){
 			String[] tmp = s.split(";");
 			try {
-				documentList.add(findDocument(tmp[1], tmp[0]));
+				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], findDocument(tmp[1], tmp[0]));
+				documentList.add(doc);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		System.out.println(documentList);
+
 		return documentList;
 	}
 

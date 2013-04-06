@@ -18,4 +18,12 @@ public class DocumentImpl implements Document {
     public String getContent() {
         return null;
     }
+
+    public String toString() {
+        String output = "";
+        output += String.format("[Doc id: %s]\n", id);
+        output += String.format("{\n%s\n}\n", content);
+        output += "--------EOD---------\n";
+        return output;
+    }
 }
