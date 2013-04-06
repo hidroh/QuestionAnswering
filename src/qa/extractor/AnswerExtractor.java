@@ -4,6 +4,7 @@ import java.util.List;
 
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
+import qa.model.Passage;
 
 /**
  * Interface for answer extractor component, which filters non-relevant
@@ -18,7 +19,7 @@ public interface AnswerExtractor {
 	 * @param answerInfo answer information
 	 * @return list of ranked results
 	 */
-	List<ResultInfo> extractAnswer(List<String> passages, 
+	List<ResultInfo> extractAnswer(List<Passage> passages, 
 			QuestionInfo questionInfo,
 			String answerInfo);
 }

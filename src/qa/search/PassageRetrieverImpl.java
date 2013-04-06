@@ -25,8 +25,11 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.document.StringField;
 
 import qa.Settings;
+import qa.model.Passage;
+import qa.model.PassageImpl;
 
 public class PassageRetrieverImpl implements PassageRetriever {
     private IndexWriter iw;
@@ -61,7 +64,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
     }
 
     @Override
-    public List<String> getPassages(String answerInfo) {
+    public List<Passage> getPassages(String answerInfo) {
         try {
             if (!hasIndexData()) {
                 indexDocument();
@@ -72,7 +75,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
             System.err.println("Unable to retrieve passages");
         }
 
-        return new ArrayList<String>();
+        return new ArrayList<Passage>();
     }
 
     private boolean hasIndexData() {
@@ -129,6 +132,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
                 String passageString = getPassageSentences(passage);
                 Document doc = new Document();
                 doc.add(new TextField("PASSAGE", passageString, Field.Store.YES));
+                doc.add(new StringField("DOCID", passageString, Field.Store.YES));
                 docs.add(doc);
             }
         }
@@ -145,8 +149,8 @@ public class PassageRetrieverImpl implements PassageRetriever {
         return passageString;
     }
 
-    private List<String> query(String queryString) throws Exception {
-        List<String> results = new ArrayList<String>();
+    private List<Passage> query(String queryString) throws Exception {
+        List<Passage> results = new ArrayList<Passage>();
         ScoreDoc[] topHits;
         Query query = new QueryParser(Version.LUCENE_41, "PASSAGE", sa)
                 .parse(queryString);
@@ -169,7 +173,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
             Document d = is.doc(topHits[i].doc);
             if (topHits[i].score >= cutOffScore) {
                 System.out.printf("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE"));
-                results.add(d.get("PASSAGE"));
+                results.add(new PassageImpl(d.get("DOCID"), d.get("PASSAGE")));
             }
         }
 

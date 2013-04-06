@@ -5,13 +5,14 @@ import java.util.ArrayList;
 
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
+import qa.model.Passage;
 
 /**
  * Interface for answer extractor component, which filters non-relevant
  * passages, extract exact answers from relevant passages and rank them
  */
 public class AnswerExtractorImpl implements AnswerExtractor {
-    public List<ResultInfo> extractAnswer(List<String> passages, 
+    public List<ResultInfo> extractAnswer(List<Passage> passages, 
             QuestionInfo questionInfo,
             String answerInfo) {
         return new ArrayList<ResultInfo>();

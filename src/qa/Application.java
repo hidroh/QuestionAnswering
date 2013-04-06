@@ -21,6 +21,7 @@ import qa.indexer.DocumentIndexer;
 import qa.model.Document;
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
+import qa.model.Passage;
 import qa.parser.QuestionParser;
 import qa.search.DocumentRetriever;
 import qa.search.PassageRetriever;
@@ -94,7 +95,7 @@ public class Application {
 			// from this set of document, narrow down result set by
 			// filtering
 			// only passages that possibly contain answer type
-			List<String> relevantPassages = new ArrayList<String>();
+			List<Passage> relevantPassages = new ArrayList<Passage>();
 			for (Document document : relevantDocs) {
 				// create passage retriever
 				PassageRetriever passageRetriever = prFactory.createPassageRetriever(document);

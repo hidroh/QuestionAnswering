@@ -1,6 +1,7 @@
 package qa.search;
 
 import java.util.List;
+import qa.model.Passage;
 
 /**
  * Interface for passage retriever, which segments document into passages,
@@ -12,5 +13,5 @@ public interface PassageRetriever {
 	 * @param answerInfo query information
 	 * @return list of ranked relevant passages
 	 */
-	List<String> getPassages(String answerInfo);
+	List<Passage> getPassages(String answerInfo);
 }
