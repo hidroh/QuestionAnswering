@@ -30,11 +30,11 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
 import qa.Settings;
-//import qa.indexer.DocumentIndexer;
+import qa.indexer.DocumentIndexer;
 //import qa.model.Document;
 //import qa.model.QueryTerm;
 
-public class LuceneIndexer {
+public class LuceneIndexer implements DocumentIndexer {
 
 	public static void main(String[] args) {
 		try {
