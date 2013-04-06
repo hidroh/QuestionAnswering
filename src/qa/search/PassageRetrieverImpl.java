@@ -23,6 +23,13 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.store.MMapDirectory;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.IndexSearcher;
 
 import qa.Settings;
 import qa.model.Passage;
@@ -31,7 +38,6 @@ public class PassageRetrieverImpl implements PassageRetriever {
     private IndexWriter iw;
     private StandardAnalyzer sa;
     private Directory indexDirectory;
-    private final String DELIMETER = ".";
     private qa.model.Document document;
     private String indexPath;
     private String documentPath;
@@ -41,7 +47,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
         documentPath = Settings.get("PASSAGE_DOCUMENT_PATH") + File.separator + document.getId();
         indexPath = Settings.get("PASSAGE_INDEX_PATH") + document.getId();
         try {
-            File file = new File(Settings.get("PASSAGE_DOCUMENT_PATH"), document.getId());
+            File file = new File(documentPath);
             // if file doesnt exists, then create it
             if (!file.exists()) {
                 file.createNewFile();
@@ -104,8 +110,6 @@ public class PassageRetrieverImpl implements PassageRetriever {
     private void parseDocument(qa.model.Document document) throws IOException {
         ArrayList<Document> docs = new ArrayList<Document>();
 
-        iw.addDocuments(docs);
-
         String content = document.getContent().replace("\n\n\n", "|||").replace("\n", " ").replace("|||", "\n");
 
         Pattern sentencePattern = Pattern.compile("((?:.*))",
@@ -133,6 +137,8 @@ public class PassageRetrieverImpl implements PassageRetriever {
                 docs.add(doc);
             }
         }
+        
+        iw.addDocuments(docs);        
     }
 
     private String getPassageSentences(Queue<String> passage) {
@@ -142,5 +148,28 @@ public class PassageRetrieverImpl implements PassageRetriever {
         }
 
         return passageString;
+    }
+
+    private void query(String queryString) {
+        ScoreDoc[] topHits;
+        try {
+            Query query = new QueryParser(Version.LUCENE_41, "PASSAGE", sa)
+                    .parse(queryString);
+
+            IndexReader ir = DirectoryReader.open(indexDirectory);
+            System.out.printf("Total passages indexed: %d\n", ir.numDocs());
+            IndexSearcher is = new IndexSearcher(ir);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(
+                    Integer.parseInt(Settings.get("PASSAGE_HITS")), true);
+            is.search(query, collector);
+            topHits = collector.topDocs().scoreDocs;
+
+            System.out.printf("Found %d passage hits\n", topHits.length);
+            for (int i = 0; i < topHits.length; ++i) {                
+                Document d = is.doc(topHits[i].doc);
+                System.out.println("----------\n" + d.get("PASSAGE"));
+            }
+        } catch (Exception e) {
+        }
     }
 }

@@ -64,7 +64,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			is.search(query, collector);
 			topHits = collector.topDocs().scoreDocs;
 
-			System.out.println("Found " + topHits.length + " hits.");
+			System.out.println("Found " + topHits.length + " document hits.");
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < topHits.length; ++i) {
 				
