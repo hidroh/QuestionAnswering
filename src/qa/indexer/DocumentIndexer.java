@@ -5,5 +5,5 @@ package qa.indexer;
  * and more efficient retrieval
  */
 public interface DocumentIndexer {
-
+    void importDocuments(String documentPath);
 }

@@ -1,36 +1,23 @@
 package qa.indexer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TopScoreDocCollector;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.MMapDirectory;
-import org.apache.lucene.util.Version;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.MMapDirectory;
+import org.apache.lucene.util.Version;
 
 import qa.Settings;
-import qa.indexer.DocumentIndexer;
 //import qa.model.Document;
 //import qa.model.QueryTerm;
 
@@ -44,141 +31,13 @@ public class LuceneIndexer implements DocumentIndexer {
 			e.printStackTrace();
 		}
 
-		importDocuments(Settings.get("DOCUMENT_PATH"));
-		String debug = "lenihan";
+		// importDocuments(Settings.get("DOCUMENT_PATH"));
+		// String debug = "lenihan";
 
-		List<String> ans = getDocuments(debug);
-	}
-
-	public void setIndexer() { // DocumentIndexer indexer)
-		// TODO Auto-generated method stub
-
+		// List<String> ans = getDocuments(debug);
 	}
 
 	static int NUM_HITS = 10; // Number of hits to be displayed
-
-	public static List<String> getDocuments(String queryString) { // List<QueryTerm>
-																	// query
-
-		List<String> result = new ArrayList<String>();
-		HashMap<String, Integer> docHits = new HashMap<String, Integer>();
-
-		ScoreDoc[] topHits;
-		try {
-			Query query = new QueryParser(Version.LUCENE_41, "TEXT", sa)
-					.parse(queryString);
-
-			IndexReader ir = IndexReader.open(dir);
-			IndexSearcher is = new IndexSearcher(ir);
-			TopScoreDocCollector collector = TopScoreDocCollector.create(
-					NUM_HITS, true);
-			is.search(query, collector);
-			topHits = collector.topDocs().scoreDocs;
-
-			System.out.println("Found " + topHits.length + " hits.");
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < topHits.length; ++i) {
-				
-				Document d = is.doc(topHits[i].doc);
-				
-				sb.append(d.get("FILENAME"));
-				sb.append(";");
-				sb.append(d.get("DOCNO"));
-				
-				
-				
-				if (docHits.containsKey(sb.toString())){
-					docHits.put(sb.toString(), docHits.get(sb.toString()) + 1);
-
-				} else {
-					docHits.put(sb.toString(), 1);
-				}
-				System.out.println("Document id = " + d.get("DOCNO"));
-				result.add(d.get("TEXT"));
-				sb = new StringBuilder();
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-
-		// result contains the paragraphs with the hits
-		return printResult(result, docHits);
-	}
-
-	private static ArrayList<String> printResult(List<String> result, HashMap<String, Integer> map) {
-		int i = 0;
-		for (String s : result) {
-			System.out.println(++i + ": " + s);
-		}
-		
-		ValueComparator bvc = new ValueComparator(map);
-		TreeMap<String,Integer> sortedMap = new TreeMap<String,Integer>(bvc);
-		
-		sortedMap.putAll(map);
-		
-		Map.Entry<String, Integer> entry = sortedMap.firstEntry();
-		String val = entry.getKey();
-		int hits = entry.getValue();
-		System.out.println(val + " "+ hits);
-		
-		System.out.println(sortedMap.remove(val));
-		
-		ArrayList<String> ans = new ArrayList<String>();
-		ans.add(val);
-		System.out.println(sortedMap);
-		
-		// while next entry is within 90% of this one, return it aswell
-		while (!sortedMap.isEmpty()){
-			Map.Entry<String, Integer> tmp = sortedMap.firstEntry();
-			if (0.9*hits > entry.getValue()){
-				break;
-			} else {
-				ans.add(tmp.getKey());
-				sortedMap.remove(tmp.getKey());
-			}
-			//System.out.println(sortedMap.size());
-		}
-		
-		ArrayList<String> documentList = new ArrayList<String>();
-		for (String s : ans){
-			String[] tmp = s.split(";");
-			try {
-				documentList.add(findDocument(tmp[1], tmp[0]));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		System.out.println(documentList);
-		return documentList;
-	}
-
-	private static String findDocument(String docId, String filePath) throws FileNotFoundException {
-		Scanner scanner = new Scanner(new File(filePath));
-		StringBuilder sb = new StringBuilder();
-		while(scanner.hasNextLine()){
-			String next = scanner.nextLine();
-			if (next.contains(docId)){
-				while (scanner.hasNextLine()){
-					next = scanner.nextLine();
-					if (next.contains("<TEXT>")){
-						sb.append(next.replace("<TEXT>", "").replace("<P>", "").replace("</P>", ""));
-						sb.append("\n");
-						
-						while (!next.contains("</TEXT>")){
-							next = scanner.nextLine();
-							sb.append(next.replace("</TEXT>", "").replace("<P>", "").replace("</P>", ""));
-							sb.append("\n");
-						}
-						return sb.toString().trim();
-					}
-				}
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * @param documentPath
@@ -189,7 +48,7 @@ public class LuceneIndexer implements DocumentIndexer {
 	static Directory dir;
 	static String DIRECTORY_PATH = Settings.get("INDEX_PATH");
 
-	public static void importDocuments(String documentPath) {
+	public void importDocuments(String documentPath) {
 
 		Collection<File> allDocs = new ArrayList<File>();
 		addFiles(new File(documentPath), allDocs);
