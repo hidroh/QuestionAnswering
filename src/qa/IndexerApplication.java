@@ -5,9 +5,9 @@ import java.util.List;
 import qa.Settings;
 import qa.indexer.DocumentIndexer;
 import qa.indexer.LuceneIndexer;
-import qa.indexer.DocumentRetrieverImpl;
 import qa.model.Document;
 import qa.model.DocumentImpl;
+import qa.search.DocumentRetrieverImpl;
 
 public class IndexerApplication {
     public static void main(String[] args) {

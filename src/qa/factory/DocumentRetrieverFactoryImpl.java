@@ -1,7 +1,7 @@
 package qa.factory;
 
-import qa.indexer.DocumentRetrieverImpl;
 import qa.search.DocumentRetriever;
+import qa.search.DocumentRetrieverImpl;
 
 public class DocumentRetrieverFactoryImpl implements DocumentRetrieverFactory {
 	private DocumentRetriever instance; 

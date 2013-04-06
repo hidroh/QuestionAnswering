@@ -1,4 +1,4 @@
-package qa.indexer;
+package qa.search;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 
 import qa.helper.ApplicationHelper;
+import qa.indexer.ValueComparator;
 import qa.Settings;
-import qa.search.DocumentRetriever;
 
 public class DocumentRetrieverImpl implements DocumentRetriever {
 	private StandardAnalyzer sa;
