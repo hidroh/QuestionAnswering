@@ -1,1 +1,1 @@
-java -ea -cp "bin/:lib/*" qa.IndexerApplication "$@"
+java -Xmx1024m -ea -cp "bin/:lib/*" qa.IndexerApplication "$@"

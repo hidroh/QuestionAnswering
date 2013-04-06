@@ -1,1 +1,1 @@
-java -ea -cp "bin/:lib/*" qa.Application "$@"
+java -Xmx1024m -ea -cp "bin/:lib/*" qa.Application "$@"
