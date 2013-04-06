@@ -11,6 +11,9 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import qa.model.enumerator.QueryType;
+import qa.model.enumerator.QuerySubType;
+import qa.model.QuestionInfoImpl;
 import qa.Settings;
 import qa.classifier.QuestionClassifier;
 import qa.classifier.QuestionClassifierImpl;
@@ -28,6 +31,9 @@ public class ClassifierApplication {
 	public static final String ANSI_PURPLE = "\u001B[35m";
 	public static final String ANSI_CYAN = "\u001B[36m";
 	public static final String ANSI_WHITE = "\u001B[37m";
+
+	private static ClassifierInfo trainingInfo;
+	private static QuestionClassifier classifier;
 
 	/**
 	 * @param args
@@ -67,7 +73,7 @@ public class ClassifierApplication {
 					.get("CLASSIFIER_THRESHOLD")));
 			qc.setResultLimit(Integer.parseInt(Settings.get("CLASSIFIER_LIMIT")));
 
-			ClassifierInfo trainingInfo = loadClassifier();
+			ClassifierInfo trainingInfo = loadClassifierInfo();
 			if (trainingInfo != null) {
 				int correct = 0;
 				int subCorrect = 0;
@@ -140,41 +146,74 @@ public class ClassifierApplication {
 
 	}
 
-	public static String classify(String[] args) {
+	private static void classify(String[] args) {
 		if (args.length == 0) {
-			return null;
+			return;
 		}
 
-		ClassifierInfo trainingInfo = loadClassifier();
-		if (trainingInfo != null) {
-			boolean SUPPRESS_LOG = false;
-			QuestionClassifier qc = new QuestionClassifierImpl(SUPPRESS_LOG);
-			ClassifierHelper helper = ClassifierHelper.getInstance();
-			qc.setStopWords(helper.getStopWords(Settings
-					.get("STOPWORD_LIST_PATH")));
-			qc.setThreshold(Double.parseDouble(Settings
-					.get("CLASSIFIER_THRESHOLD")));
-			qc.setResultLimit(Integer.parseInt(Settings.get("CLASSIFIER_LIMIT")));
+		if (trainingInfo == null) {
+			trainingInfo = loadClassifierInfo();
+		}
 
+		if (classifier == null) {
+			setClassifier();
+		}
+
+		if (trainingInfo != null && classifier != null) {
 			for (int i = 0; i < args.length; i++) {
 				String question = args[i];
-				System.out.printf("\nQ: \"%s\"\n", question);
-				List<String> classified = qc.apply(helper.getAllQueryTypes(),
-						helper.getAllQuerySubTypes(), trainingInfo, question);
-				String subClassified = "";
-				for (int j = 1; j < classified.size(); j++) {
-					subClassified += String.format("%-15s", classified.get(j));
-				}
-				System.out.printf("Classified as: %s:[%s]\n",
-						classified.get(0), subClassified);
-				return classified.get(0);
+				classifyQuestion(question);
 			}
 		} else {
 			System.err
 					.println("Operation halted, unable to retrieve trained data");
 		}
+	}
 
-		return null;
+	private static QuestionInfo classifyQuestion(String question) {
+		ClassifierHelper helper = ClassifierHelper.getInstance();
+		System.out.printf("\nQ: \"%s\"\n", question);
+		List<String> classified = classifier.apply(helper.getAllQueryTypes(),
+				helper.getAllQuerySubTypes(), trainingInfo, question);
+		String subClassified = "";
+		for (int j = 1; j < classified.size(); j++) {
+			subClassified += String.format("%-15s", classified.get(j));
+		}
+		System.out.printf("Classified as: %s:[%s]\n", classified.get(0),
+				subClassified);
+		return new QuestionInfoImpl(QueryType.valueOf(classified.get(0)),
+				QuerySubType.valueOf(subClassified.trim()),
+				helper.getQueryTerms(question), question);
+	}
+
+	private static void setClassifier() {
+		boolean SUPPRESS_LOG = false;
+		classifier = new QuestionClassifierImpl(SUPPRESS_LOG);
+		ClassifierHelper helper = ClassifierHelper.getInstance();
+		classifier.setStopWords(helper.getStopWords(Settings
+				.get("STOPWORD_LIST_PATH")));
+		classifier.setThreshold(Double.parseDouble(Settings
+				.get("CLASSIFIER_THRESHOLD")));
+		classifier.setResultLimit(Integer.parseInt(Settings
+				.get("CLASSIFIER_LIMIT")));
+	}
+
+	public static QuestionInfo classify(String question) {
+		if (trainingInfo == null) {
+			trainingInfo = loadClassifierInfo();
+		}
+
+		if (classifier == null) {
+			setClassifier();
+		}
+
+		if (trainingInfo != null && classifier != null) {
+			return classifyQuestion(question);
+		} else {
+			System.err
+					.println("Operation halted, unable to retrieve trained data");
+			return null;
+		}
 	}
 
 	private static void printUsage() {
@@ -238,7 +277,7 @@ public class ClassifierApplication {
 		}
 	}
 
-	private static ClassifierInfo loadClassifier() {
+	private static ClassifierInfo loadClassifierInfo() {
 		try {
 			FileInputStream f_in = new FileInputStream(
 					Settings.get("CLASSIFIER_PATH"));

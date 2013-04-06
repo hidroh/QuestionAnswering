@@ -82,8 +82,6 @@ public class Application {
 			// parse question to get expanded query and query type
 			QuestionInfo questionInfo = questionParser.parse(question);
 
-			String classified = ClassifierApplication.classify(new String[] { question } );
-
 			// use search engine to search for possible answers and rank
 			// them
 			searchEngine.search(questionInfo); // TODO: use searchEngine in the
