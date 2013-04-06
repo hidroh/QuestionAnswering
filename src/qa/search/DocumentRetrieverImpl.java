@@ -64,7 +64,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			is.search(query, collector);
 			topHits = collector.topDocs().scoreDocs;
 
-			System.out.println("Found " + topHits.length + " document hits.");
+			ApplicationHelper.printDebug(String.format("Found %d document hits\n", topHits.length));
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < topHits.length; ++i) {
 				
@@ -82,7 +82,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				} else {
 					docHits.put(sb.toString(), 1);
 				}
-				System.out.println("Document id = " + d.get("DOCNO"));
+				ApplicationHelper.printDebug(String.format("Document id = %s\n", d.get("DOCNO")));
 				result.add(d.get("TEXT"));
 				sb = new StringBuilder();
 			}

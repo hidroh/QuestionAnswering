@@ -126,8 +126,7 @@ public class Application {
 		System.out.printf("\nQ: \"%s\"\n", question);
 		System.out.println("A(s):");
 		for (ResultInfo resultInfo : results) {
-			System.out.printf("[%-5s] %s\n", resultInfo.getSupportingDocument()
-					.getId(), resultInfo.getAnswer());
+			System.out.printf("[%s]\n%s\n\n", resultInfo.getSupportingDocumentId(), resultInfo.getAnswer());
 		}
 	}
 }

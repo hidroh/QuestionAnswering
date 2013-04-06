@@ -14,7 +14,7 @@ public interface ResultInfo {
 	
 	/**
 	 * Get supporting document for this result
-	 * @return supporting document
+	 * @return supporting document id
 	 */
-	Document getSupportingDocument();
+	String getSupportingDocumentId();
 }

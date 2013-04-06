@@ -28,6 +28,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.document.StringField;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 import qa.model.Passage;
 import qa.model.PassageImpl;
 
@@ -132,7 +133,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
                 String passageString = getPassageSentences(passage);
                 Document doc = new Document();
                 doc.add(new TextField("PASSAGE", passageString, Field.Store.YES));
-                doc.add(new StringField("DOCID", passageString, Field.Store.YES));
+                doc.add(new StringField("DOCID", document.getId(), Field.Store.YES));
                 docs.add(doc);
             }
         }
@@ -163,16 +164,16 @@ public class PassageRetrieverImpl implements PassageRetriever {
         is.search(query, collector);
         topHits = collector.topDocs().scoreDocs;
 
-        System.out.printf("Found %d passage hits\n", topHits.length);
+        ApplicationHelper.printDebug(String.format("Found %d passage hits\n", topHits.length));
         float cutOffScore = -1;
         if (topHits.length > 0) {
             cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
-            System.out.printf("Cut off score = %f\n", cutOffScore);
+            ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
         }
         for (int i = 0; i < topHits.length; ++i) {
             Document d = is.doc(topHits[i].doc);
             if (topHits[i].score >= cutOffScore) {
-                System.out.printf("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE"));
+                ApplicationHelper.printDebug(String.format("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE")));
                 results.add(new PassageImpl(d.get("DOCID"), d.get("PASSAGE")));
             }
         }
