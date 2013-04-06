@@ -183,7 +183,7 @@ public class ClassifierApplication {
 				subClassified);
 		return new QuestionInfoImpl(QueryType.valueOf(classified.get(0)),
 				QuerySubType.valueOf(subClassified.trim()),
-				helper.getQueryTerms(question), question);
+				helper.getSearchEngineQueryTerms(question), question);
 	}
 
 	private static void setClassifier() {

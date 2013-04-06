@@ -276,6 +276,20 @@ public class ClassifierHelper {
 		return terms;
 	}
 
+	public List<QueryTerm> getSearchEngineQueryTerms(String text) {
+		List<QueryTerm> terms = new ArrayList<QueryTerm>();
+		Pattern wordPattern = Pattern.compile("\\w+",
+				Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Matcher m = wordPattern.matcher(text);
+		while (m.find()) {
+			String word = m.group();
+
+			terms.add(new QueryTermImpl(word));
+		}
+
+		return terms;
+	}
+
 	private ArrayList<String> getSemanticClass(String word) {
 		if (semanticClasses.containsKey(word)) {
 			return semanticClasses.get(word);
