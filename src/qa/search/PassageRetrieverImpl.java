@@ -62,11 +62,15 @@ public class PassageRetrieverImpl implements PassageRetriever {
 
     @Override
     public List<String> getPassages(String answerInfo) {
-        if (!hasIndexData()) {
-            indexDocument();
-        }
+        try {
+            if (!hasIndexData()) {
+                indexDocument();
+            }
 
-        query(answerInfo);
+            return query(answerInfo);
+        } catch (Exception e) {
+            System.err.println("Unable to retrieve passages");
+        }
 
         return new ArrayList<String>();
     }
@@ -141,33 +145,34 @@ public class PassageRetrieverImpl implements PassageRetriever {
         return passageString;
     }
 
-    private void query(String queryString) {
+    private List<String> query(String queryString) throws Exception {
+        List<String> results = new ArrayList<String>();
         ScoreDoc[] topHits;
-        try {
-            Query query = new QueryParser(Version.LUCENE_41, "PASSAGE", sa)
-                    .parse(queryString);
+        Query query = new QueryParser(Version.LUCENE_41, "PASSAGE", sa)
+                .parse(queryString);
 
-            IndexReader ir = DirectoryReader.open(indexDirectory);
-            System.out.printf("Total passages indexed: %d\n", ir.numDocs());
-            IndexSearcher is = new IndexSearcher(ir);
-            TopScoreDocCollector collector = TopScoreDocCollector.create(
-                    Integer.parseInt(Settings.get("PASSAGE_HITS")), true);
-            is.search(query, collector);
-            topHits = collector.topDocs().scoreDocs;
+        IndexReader ir = DirectoryReader.open(indexDirectory);
+        System.out.printf("Total passages indexed: %d\n", ir.numDocs());
+        IndexSearcher is = new IndexSearcher(ir);
+        TopScoreDocCollector collector = TopScoreDocCollector.create(
+                Integer.parseInt(Settings.get("PASSAGE_HITS")), true);
+        is.search(query, collector);
+        topHits = collector.topDocs().scoreDocs;
 
-            System.out.printf("Found %d passage hits\n", topHits.length);
-            float cutOffScore = -1;
-            if (topHits.length > 0) {
-                cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
-                System.out.printf("Cut off score = %f\n", cutOffScore);
-            }
-            for (int i = 0; i < topHits.length; ++i) {                
-                Document d = is.doc(topHits[i].doc);
-                if (topHits[i].score >= cutOffScore) {
-                    System.out.printf("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE"));
-                }
-            }
-        } catch (Exception e) {
+        System.out.printf("Found %d passage hits\n", topHits.length);
+        float cutOffScore = -1;
+        if (topHits.length > 0) {
+            cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
+            System.out.printf("Cut off score = %f\n", cutOffScore);
         }
+        for (int i = 0; i < topHits.length; ++i) {
+            Document d = is.doc(topHits[i].doc);
+            if (topHits[i].score >= cutOffScore) {
+                System.out.printf("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE"));
+                results.add(d.get("PASSAGE"));
+            }
+        }
+
+        return results;
     }
 }
