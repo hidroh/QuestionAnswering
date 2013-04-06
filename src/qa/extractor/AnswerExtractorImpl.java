@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import qa.model.QuestionInfo;
 import qa.model.ResultInfo;
 import qa.model.Passage;
-import qa.model.ResultInfo;
 import qa.model.ResultInfoImpl;
 
 /**
