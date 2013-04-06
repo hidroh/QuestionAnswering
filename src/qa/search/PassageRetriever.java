@@ -2,7 +2,6 @@ package qa.search;
 
 import java.util.List;
 
-import qa.model.Document;
 import qa.model.Passage;
 
 /**
@@ -11,11 +10,9 @@ import qa.model.Passage;
  */
 public interface PassageRetriever {
 	/**
-	 * Retrieves list of relevant passages from given document for given
-	 * query
-	 * @param document document from which passages are retrieved
+	 * Retrieves list of relevant passages for given query
 	 * @param answerInfo query information
 	 * @return list of ranked relevant passages
 	 */
-	List<Passage> getPassages(Document document, String answerInfo);
+	List<Passage> getPassages(String answerInfo);
 }

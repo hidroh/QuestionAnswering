@@ -11,12 +11,12 @@ public class DocumentImpl implements Document {
 
     @Override
     public String getId() {
-        return null;
+        return id;
     }
 
     @Override
     public String getContent() {
-        return null;
+        return content;
     }
 
     public String toString() {

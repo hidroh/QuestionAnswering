@@ -70,9 +70,8 @@ public class Application {
 			documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));	
 		}
 
-		// create passage retriever
+		// init passage retriever factory
 		PassageRetrieverFactory prFactory = new PassageRetrieverFactoryImpl();
-		PassageRetriever passageRetriever = prFactory.createPassageRetriever();
 
 		// create answer extractor
 		AnswerExtractorFactory aeFactory = new AnswerExtractorFactoryImpl();
@@ -98,8 +97,10 @@ public class Application {
 			// only passages that possibly contain answer type
 			List<Passage> relevantPassages = new ArrayList<Passage>();
 			for (Document document : relevantDocs) {
-				relevantPassages.addAll(passageRetriever.getPassages(
-						document, irQuery));
+				// create passage retriever
+				PassageRetriever passageRetriever = prFactory.createPassageRetriever(document);
+
+				relevantPassages.addAll(passageRetriever.getPassages(irQuery));
 			}
 
 			// extract ranked answers from relevant passages
