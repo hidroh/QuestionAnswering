@@ -26,17 +26,24 @@ import qa.model.Passage;
 public class PassageRetrieverImpl implements PassageRetriever {
     private IndexWriter iw;
     private StandardAnalyzer sa;
-    private Directory dir;
+    private Directory indexDirectory;
     private final String DELIMETER = ".";
     private qa.model.Document document;
+    private String indexPath;
+    private String documentPath;
 
     public PassageRetrieverImpl(qa.model.Document document) {
         this.document = document;
+        documentPath = Settings.get("PASSAGE_DOCUMENT_PATH") + File.separator + document.getId();
+        indexPath = Settings.get("PASSAGE_INDEX_PATH") + document.getId();
         try {
-            File file = new File(Settings.get("PASSAGE_INDEX_PATH"), document.getId());
+            File file = new File(Settings.get("PASSAGE_DOCUMENT_PATH"), document.getId());
             // if file doesnt exists, then create it
             if (!file.exists()) {
                 file.createNewFile();
+
+                File dir = new File(indexPath);
+                dir.mkdir();
 
                 FileWriter fw = new FileWriter(file.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
@@ -48,7 +55,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
 
         sa = new StandardAnalyzer(Version.LUCENE_41);
         try {
-            dir = new MMapDirectory(new File(Settings.get("PASSAGE_INDEX_PATH")));
+            indexDirectory = new MMapDirectory(new File(indexPath));
         } catch (IOException e) {
             System.err.println("Unable to init indexed directory");
         }
@@ -56,109 +63,46 @@ public class PassageRetrieverImpl implements PassageRetriever {
 
     @Override
     public List<Passage> getPassages(String answerInfo) {
+        if (!hasIndexData()) {
+            indexDocument();
+        }
+
         return new ArrayList<Passage>();
     }
 
-    private void indexDocument(String documentPath) {
-        Collection<File> allDocs = new ArrayList<File>();
-        addFiles(new File(documentPath), allDocs);
+    private boolean hasIndexData() {
+        File file = new File(indexPath);
+        if(file.isDirectory()){
+            if(file.list().length > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void indexDocument() {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
 
         try {
-            iw = new IndexWriter(dir, config);
-            for (File file : allDocs) {
-                parseFile(file);
-            }
+            iw = new IndexWriter(indexDirectory, config);
+            parseDocument(document);
             iw.close();
         } catch (IOException e1) {
             e1.printStackTrace();
         }
     }
 
-    private void parseFile(File file) throws IOException {
-        Scanner scanner = new Scanner(file);
+    private void parseDocument(qa.model.Document document) throws IOException {
         Document doc = null;
-        String docno = null;
         ArrayList<Document> docs = null;
 
-        while (scanner.hasNextLine()) {
-            String nextLine = scanner.nextLine();
-            
-            if (nextLine.contains("<DOC>")) {
-                
-                docs = new ArrayList<Document>();
-            
-            } else if (nextLine.contains("</DOC>")) {
-                iw.addDocuments(docs);
-                doc = null;
-                docno = null;
-                docs = null;    
-                
-            } else if (nextLine.contains("<DOCNO>")
-                    && nextLine.contains("</DOCNO>")) {
+        docs = new ArrayList<Document>();
 
-                docno = nextLine.substring(7, nextLine.length() - 8).trim();
+        iw.addDocuments(docs);
 
-            } else if (nextLine.equals("<TEXT>") && docno != null) { 
-                // The body of text of the document. We will save every
-                // paragraph as in a separate document in Lucene.
+        doc.add(new TextField("TEXT", "", Field.Store.YES));
 
-                StringBuilder sbParagraph = null; // text of a paragraph will
-                                                    // later be
-                // added here.
-                boolean containedParagraph = false;
-
-                while (!(nextLine = scanner.nextLine()).equals("</TEXT>")) {
-                    // loop until we reach the end of text
-
-                    if (nextLine.contains("<P>")) {
-                        // beginning of paragraph
-
-                        sbParagraph = new StringBuilder();
-                        doc = new Document();
-                        sbParagraph.append(nextLine);
-                        sbParagraph.append("\n");
-                        containedParagraph = true;
-
-                    } else if (nextLine.contains("</P>")) {
-                        // end of paragraph.
-                        sbParagraph.append(nextLine);
-                        String tmp = sbParagraph.substring(3, sbParagraph.length() - 4).trim();
-
-                        doc.add(new TextField("TEXT", tmp, Field.Store.YES));
-                        doc.add(new TextField("DOCNO", docno, Field.Store.YES));
-                        doc.add(new StringField("FILENAME", file.getAbsolutePath(), Field.Store.YES));
-                        //System.out.println(file.getAbsolutePath());
-
-                        docs.add(doc);
-                        
-                    } else if (containedParagraph) {
-                        sbParagraph.append(nextLine);
-                        sbParagraph.append("\n");
-                    }
-                }
-
-            } else {
-
-                // Do nothing
-            }
-        }
-
-        System.out.println(file.getName());
-        scanner.close();
-    }
-
-    private void addFiles(File documentPath, Collection<File> allDocs) {
-        File[] children = documentPath.listFiles();
-
-        if (children != null) {
-            for (File child : children) {
-                if (child.isFile() && !child.getName().contains(DELIMETER)) {
-                    allDocs.add(child);
-                } else {
-                    addFiles(child, allDocs);
-                }
-            }
-        }
+        docs.add(doc);
     }
 }

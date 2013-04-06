@@ -36,7 +36,7 @@ public class LuceneIndexer implements DocumentIndexer {
 
 	@Override
 	public boolean hasIndexData(String indexPath) {
-		File file = new File(Settings.get("INDEX_PATH"));
+		File file = new File(indexPath);
 		if(file.isDirectory()){
 			if(file.list().length > 0) {
 				return true;
