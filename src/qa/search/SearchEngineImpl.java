@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import qa.Settings;
 import qa.model.QuestionInfo;
-import qa.model.QueryTerm;;
+import qa.model.QueryTerm;
+import qa.model.enumerator.QuerySubType;
+import qa.model.enumerator.QueryType;
 
 public class SearchEngineImpl implements SearchEngine {
 
@@ -79,7 +80,7 @@ public class SearchEngineImpl implements SearchEngine {
 		//candidateTerms = ClassifySnippets(parsedSnippets, question);
 
 		//5. Extract those of Q-type and add to scoring (do novelty scoring)
-		term_Freq_Map = ImproveScoring(term_Freq_Map, candidateTerms, "PERSON");
+		term_Freq_Map = ImproveScoring(term_Freq_Map, candidateTerms, "LOCATION");
 
 		//6. Ranking and return top 5;
 		String answer = RankAnwers(term_Freq_Map);
@@ -119,18 +120,8 @@ public class SearchEngineImpl implements SearchEngine {
 		//	System.out.println(t.term + ":" + t.key);
 		}
 		
-		HashSet<String> set = new HashSet<String>();
-		String[] split = ans.split(" ");
-		for(String temp:split){
-			temp = temp.trim();
-			set.add(temp);
-		}
+		String finalAns = RemoveDuplicates(ans);
 		
-		String finalAns = "";
-		for(String temp:set){
-			finalAns = finalAns + temp + " ";
-		}
-
 		System.out.println(finalAns);
 		return finalAns;
 	}
@@ -182,32 +173,73 @@ public class SearchEngineImpl implements SearchEngine {
 	//Forming a single string out of the question terms
 	private String GetQueryTerms(QuestionInfo question) {		
 		String concatTerms = "first woman killed Vietnam War" + " wiki";
+		
 		if(question == null) {
 			return concatTerms;
 		}
+	
 		List<QueryTerm> termList = question.getQuestionTerms();
-
+		
+		concatTerms = "";
 		for(QueryTerm term : termList){
 			concatTerms += (term.getText() + " ");
 		}		
+		
+		concatTerms = concatTerms + MapQueryType(question);
+		concatTerms = concatTerms + " " +MapSubQueryType(question);
+		concatTerms = RemoveDuplicates(concatTerms);
+		
+		System.out.println("concatTerms: " + concatTerms);
 		return concatTerms;
 	}
-
+	
+	//Map the question type to add to query for better results
+	private String MapQueryType(QuestionInfo q){
+		String type = "";
+		
+		switch(q.getQueryType()){
+			case ABBR:type = "abbreviation";break;
+			case DESC:type = "";break;
+			case ENTY:type = "";break;
+			case HUM :type = "person";break;
+			case LOC :type = "location";break;
+			case NUM :type = "";break;
+			default: type = "";
+		}
+		
+		return type;
+	}
+	
+	private String MapSubQueryType(QuestionInfo q){
+		MappingHelper Mapper = new MappingHelper();
+		HashMap<QuerySubType, String> map = Mapper.getMap();		
+		return map.get(q.getQuerySubType());
+	}
+	
+	private String RemoveDuplicates(String line){
+		String noDuplicates = "";
+		
+		HashSet<String> set = new HashSet<String>();
+		String[] split = line.split(" ");
+		for(String temp:split){
+			temp = temp.trim();
+			set.add(temp);
+		}
+		
+		for(String temp:set){
+			noDuplicates = noDuplicates + temp + " ";
+		}
+		
+		return noDuplicates;
+	}
+	
 	//Searching the web for results
 	private String SearchWeb(String queryTerms) {
 
-		//	/*
 		String url = "https://www.googleapis.com/customsearch/v1?"; 
 		String apiKey = Settings.get("GOOGLE_API_KEY"); 
 		String csEngineId = Settings.get("GOOGLE_ENGINE_ID"); 
-		//	*/
-
-		/*
-		String url = "https://www.googleapis.com/customsearch/v1?";
-		String apiKey = "AIzaSyBbJR-3TekdQrgFO1WRKUTra_NSzMl_DOE";
-		String csEngineId = "003683717859680101160:n33_ckvstos";
-		 */
-
+			
 		String encodedQueryString = "", request = "", queryResponse = "";		
 		InputStream response = null;
 		Scanner sc;

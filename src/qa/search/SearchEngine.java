@@ -1,8 +1,5 @@
 package qa.search;
 
-import java.util.List;
-
-import qa.model.AnswerInfo;
 import qa.model.QuestionInfo;
 
 /**
