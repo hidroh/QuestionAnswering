@@ -25,7 +25,6 @@ import org.apache.lucene.store.MMapDirectory;
 
 import qa.helper.ApplicationHelper;
 import qa.Settings;
-import qa.model.QueryTerm;
 import qa.search.DocumentRetriever;
 
 public class DocumentRetrieverImpl implements DocumentRetriever {

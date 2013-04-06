@@ -18,7 +18,6 @@ import qa.factory.QuestionParserFactoryImpl;
 import qa.factory.SearchEngineFactory;
 import qa.factory.SearchEngineFactoryImpl;
 import qa.indexer.DocumentIndexer;
-import qa.model.AnswerInfo;
 import qa.model.Document;
 import qa.model.Passage;
 import qa.model.QuestionInfo;
