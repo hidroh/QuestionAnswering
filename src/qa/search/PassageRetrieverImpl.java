@@ -157,7 +157,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
                 .parse(queryString);
 
         IndexReader ir = DirectoryReader.open(indexDirectory);
-        System.out.printf("Total passages indexed: %d\n", ir.numDocs());
+        ApplicationHelper.printDebug(String.format("Total passages indexed: %d\n", ir.numDocs()));
         IndexSearcher is = new IndexSearcher(ir);
         TopScoreDocCollector collector = TopScoreDocCollector.create(
                 Integer.parseInt(Settings.get("PASSAGE_HITS")), true);
