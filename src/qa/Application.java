@@ -79,10 +79,10 @@ public class Application {
 		// get answers for each input question
 		for (String question : args) {
 			// parse question to get expanded query and query type
-			QuestionInfo questionInfo = null;//questionParser.parse(question);
+			QuestionInfo questionInfo = questionParser.parse(question);
 
 			// use search engine to reformulate original query
-			String irQuery = "london killed vietnam people war ";//searchEngine.search(questionInfo);
+			String irQuery = searchEngine.search(questionInfo);
 
 			// get set of relevant documents based on reformulated query
 			List<Document> relevantDocs = documentRetriever
