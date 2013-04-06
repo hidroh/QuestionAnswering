@@ -6,17 +6,12 @@ import java.util.LinkedList;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Scanner;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -40,27 +35,22 @@ public class PassageRetrieverImpl implements PassageRetriever {
     private Directory indexDirectory;
     private qa.model.Document document;
     private String indexPath;
-    private String documentPath;
 
     public PassageRetrieverImpl(qa.model.Document document) {
         this.document = document;
-        documentPath = Settings.get("PASSAGE_DOCUMENT_PATH") + File.separator + document.getId();
         indexPath = Settings.get("PASSAGE_INDEX_PATH") + document.getId();
-        try {
-            File file = new File(documentPath);
-            // if file doesnt exists, then create it
-            if (!file.exists()) {
-                file.createNewFile();
-
-                File dir = new File(indexPath);
-                dir.mkdir();
-
-                FileWriter fw = new FileWriter(file.getAbsoluteFile());
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write(document.getContent());
-                bw.close();
-            }
-        } catch (IOException e) {
+        File dir = new File(indexPath);
+        if (!dir.exists()) {
+            dir.mkdir();    
+        } else if (Integer.parseInt(Settings.get("FORCE_REINDEX")) == 1) {
+			if (dir.isDirectory()) {
+				for (File f : dir.listFiles()) {
+					f.delete();
+				}
+			}
+			
+        	dir.delete();
+        	dir.mkdir();
         }
 
         sa = new StandardAnalyzer(Version.LUCENE_41);
@@ -76,6 +66,8 @@ public class PassageRetrieverImpl implements PassageRetriever {
         if (!hasIndexData()) {
             indexDocument();
         }
+
+        query(answerInfo);
 
         return new ArrayList<Passage>();
     }
