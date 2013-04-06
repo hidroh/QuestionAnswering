@@ -114,16 +114,16 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		int hits = entry.getValue();
 		ApplicationHelper.printDebug(val + " "+ hits + "\n");
 		
-		// System.out.println(sortedMap.remove(val));
+		sortedMap.remove(val);
 		
 		ArrayList<String> ans = new ArrayList<String>();
 		ans.add(val);
 		// System.out.println(sortedMap);
 		
-		// while next entry is within 90% of this one, return it aswell
+		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
 		while (!sortedMap.isEmpty()){
 			Map.Entry<String, Integer> tmp = sortedMap.firstEntry();
-			if (0.9*hits > entry.getValue()){
+			if (Double.parseDouble(Settings.get("HIT_THRESHOLD"))*hits > entry.getValue()){
 				break;
 			} else {
 				ans.add(tmp.getKey());
