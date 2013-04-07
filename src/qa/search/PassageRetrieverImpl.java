@@ -178,11 +178,13 @@ public class PassageRetrieverImpl implements PassageRetriever {
             cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
             ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
         }
-        for (int i = 0; i < topHits.length; ++i) {
+        for (int i = 0; i < topHits.length; i++) {
             Document d = is.doc(topHits[i].doc);
             if (topHits[i].score >= cutOffScore) {
                 ApplicationHelper.printDebug(String.format("-----%f-----\n%s\n", topHits[i].score, d.get("PASSAGE")));
                 results.add(new PassageImpl(d.get("DOCID"), d.get("PASSAGE")));
+            } else {
+                break;
             }
         }
 

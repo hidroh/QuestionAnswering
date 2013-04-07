@@ -2,10 +2,7 @@ package qa.search;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,7 +21,6 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 
 import qa.helper.ApplicationHelper;
-import qa.indexer.ValueComparator;
 import qa.Settings;
 
 public class DocumentRetrieverImpl implements DocumentRetriever {
@@ -43,17 +39,14 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 	}
 
 	@Override
-	public List<qa.model.Document> getDocuments(String queryString) { // List<QueryTerm>
-																	// query
+	public List<qa.model.Document> getDocuments(String queryString) {
 		if (indexDir == null) {
 			return new ArrayList<qa.model.Document>();
 		}
 
-		List<String> result = new ArrayList<String>();
-		HashMap<String, Float> docHits = new HashMap<String, Float>();
 
-		ScoreDoc[] topHits;
 		try {
+			List<qa.model.Document> results = new ArrayList<qa.model.Document>();
 			Query query = new QueryParser(Version.LUCENE_41, "TEXT", sa)
 					.parse(queryString);
 
@@ -63,71 +56,37 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			TopScoreDocCollector collector = TopScoreDocCollector.create(
 					NUM_HITS, true);
 			is.search(query, collector);
-			topHits = collector.topDocs().scoreDocs;
+			ScoreDoc[] topHits = collector.topDocs().scoreDocs;
 
 			ApplicationHelper.printDebug(String.format("Found %d document hits\n", topHits.length));
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < topHits.length; ++i) {
-				
-				Document d = is.doc(topHits[i].doc);
-				
-				sb.append(d.get("FILENAME"));
-				sb.append(";");
-				sb.append(d.get("DOCNO"));
-				
-				docHits.put(sb.toString(), topHits[i].score);
-
-				ApplicationHelper.printDebug(String.format("Document id = %s; File name = %s\n", d.get("DOCNO"), d.get("FILENAME")));
-				result.add(d.get("TEXT"));
-				sb = new StringBuilder();
+			double cutOffScore = -1;
+			if (topHits.length > 0) {
+				cutOffScore = Double.parseDouble(Settings.get("HIT_THRESHOLD")) * topHits[0].score;
+			}
+			ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
+			for (int i = 0; i < topHits.length; i++) {
+				if (topHits[i].score >= cutOffScore) {
+					Document d = is.doc(topHits[i].doc);
+					ApplicationHelper.printDebug(
+						String.format(
+							"[%f] Document id = %s; File name = %s\n", 
+							topHits[i].score,
+							d.get("DOCNO"),
+							d.get("FILENAME")
+						)
+					);
+					results.add(new qa.model.DocumentImpl(d.get("DOCNO"), getDocumentText(d.get("DOCNO"), d.get("FILENAME"))));
+				} else {
+					break;
+				}
 			}
 
+			return results;
 		} catch (Exception e) {
 			ApplicationHelper.printError(e);
 		}
 
-		// result contains the paragraphs with the hits
-		return getDocumentsWithText(result, docHits);
-	}
-
-	private List<qa.model.Document> getDocumentsWithText(List<String> result, HashMap<String, Float> map) {
-		int i = 0;
-		
-		ValueComparator bvc = new ValueComparator(map);
-		TreeMap<String,Float> sortedMap = new TreeMap<String,Float>(bvc);
-		
-		sortedMap.putAll(map);
-		
-		Float topScore = sortedMap.firstEntry().getValue();
-		Float cutOffScore = Float.parseFloat(Settings.get("HIT_THRESHOLD")) * topScore;
-		ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
-				
-		ArrayList<String> ans = new ArrayList<String>();
-		
-		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
-		while (!sortedMap.isEmpty()){
-			Map.Entry<String, Float> entry = sortedMap.firstEntry();
-			if (entry.getValue() >= cutOffScore) {
-				ApplicationHelper.printDebug(String.format("%f %s\n", entry.getValue(), entry.getKey()));
-				ans.add(entry.getKey());
-				sortedMap.remove(entry.getKey());
-			} else {
-				break;
-			}
-		}
-		
-		List<qa.model.Document> documentList = new ArrayList<qa.model.Document>();
-		for (String s : ans){
-			String[] tmp = s.split(";");
-			try {
-				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], getDocumentText(tmp[1], tmp[0]));
-				documentList.add(doc);
-			} catch (FileNotFoundException e) {
-				ApplicationHelper.printError(e);
-			}
-		}
-
-		return documentList;
+		return new ArrayList<qa.model.Document>();
 	}
 
 	private String getDocumentText(String docId, String filePath) throws FileNotFoundException {
