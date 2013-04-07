@@ -138,17 +138,17 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 
 	private String getDocumentText(String docId, String filePath) throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File(Settings.get("DOCUMENT_PATH"), filePath));
-		StringBuilder sb = new StringBuilder();
 		while(scanner.hasNextLine()){
 			String next = scanner.nextLine();
 			if (next.contains(docId)){
 				while (scanner.hasNextLine()){
 					next = scanner.nextLine();
-					if (next.contains("<TEXT>")){
-						while (!next.contains("</TEXT>")){
-							next = scanner.nextLine();
+					if (next.equals("<TEXT>")) {
+						StringBuilder sb = new StringBuilder();
+						while (!(next = scanner.nextLine()).equals("</TEXT>")) {
 							sb.append(next);
 						}
+
 						scanner.close();
 						return sb.toString().trim();
 					}
