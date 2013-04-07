@@ -58,6 +58,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 					.parse(queryString);
 
 			IndexReader ir = DirectoryReader.open(indexDir);
+	        ApplicationHelper.printDebug(String.format("Total documents indexed: %d\n", ir.numDocs()));
 			IndexSearcher is = new IndexSearcher(ir);
 			TopScoreDocCollector collector = TopScoreDocCollector.create(
 					NUM_HITS, true);
@@ -74,22 +75,19 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				sb.append(";");
 				sb.append(d.get("DOCNO"));
 				
-				
-				
 				if (docHits.containsKey(sb.toString())){
 					docHits.put(sb.toString(), docHits.get(sb.toString()) + 1);
 
 				} else {
 					docHits.put(sb.toString(), 1);
 				}
-				ApplicationHelper.printDebug(String.format("Document id = %s\n", d.get("DOCNO")));
+				ApplicationHelper.printDebug(String.format("Document id = %s; File name = %s\n", d.get("DOCNO"), d.get("FILENAME")));
 				result.add(d.get("TEXT"));
 				sb = new StringBuilder();
 			}
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			ApplicationHelper.printError(e);
 		}
 
 		// result contains the paragraphs with the hits
@@ -98,11 +96,6 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 
 	private List<qa.model.Document> printResult(List<String> result, HashMap<String, Integer> map) {
 		int i = 0;
-		if (ApplicationHelper.SHOW_DEBUG) {
-			for (String s : result) {
-				System.out.println(++i + ": " + s);
-			}			
-		}
 		
 		ValueComparator bvc = new ValueComparator(map);
 		TreeMap<String,Integer> sortedMap = new TreeMap<String,Integer>(bvc);
@@ -118,7 +111,6 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		
 		ArrayList<String> ans = new ArrayList<String>();
 		ans.add(val);
-		// System.out.println(sortedMap);
 		
 		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
 		while (!sortedMap.isEmpty()){
@@ -129,7 +121,6 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				ans.add(tmp.getKey());
 				sortedMap.remove(tmp.getKey());
 			}
-			//System.out.println(sortedMap.size());
 		}
 		
 		List<qa.model.Document> documentList = new ArrayList<qa.model.Document>();
@@ -139,8 +130,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], findDocument(tmp[1], tmp[0]));
 				documentList.add(doc);
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ApplicationHelper.printError(e);
 			}
 		}
 
