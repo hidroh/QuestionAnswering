@@ -14,6 +14,7 @@ public class ApplicationHelper {
 
     public static void printError(String error) {
         System.out.printf("[ERROR] %s\n", error);
+        System.exit(-1);
     }
 
     public static void printError(Exception e) {
@@ -23,6 +24,8 @@ public class ApplicationHelper {
                 System.out.println(s);
             }
         }
+
+        System.exit(-1);
     }
 
     public static void printWarning(String warning) {
