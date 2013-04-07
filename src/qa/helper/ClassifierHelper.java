@@ -162,28 +162,8 @@ public class ClassifierHelper {
 	}
 
 	public List<QueryTerm> getChunks(String question) {
-		List<QueryTerm> terms = new ArrayList<QueryTerm>();
-
-		// try {
-		// File file = new File("question.txt");
-		// // if file doesnt exists, then create it
-		// if (!file.exists()) {
-		// file.createNewFile();
-		// }
-
-		// FileWriter fw = new FileWriter(file.getAbsoluteFile());
-		// BufferedWriter bw = new BufferedWriter(fw);
-		// bw.write(question);
-		// bw.close();
-
-		// System.setOut(new PrintStream(new BufferedOutputStream(new
-		// FileOutputStream("chunk.txt"))));
-		// ChunksAndPOSTags.main(new String[] {"question.txt"});
-		// System.setOut(new PrintStream(System.out));
-		// } catch (IOException e) {
-		// }
-
-		return terms;
+		String chunks = ChunkerWrapper.getInstance().chunk(question);
+		return getPreloadedChunks(chunks);
 	}
 
 	private List<QueryTerm> getPreloadedChunks(String chunks) {
