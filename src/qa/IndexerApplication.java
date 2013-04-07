@@ -13,7 +13,10 @@ import qa.search.DocumentRetrieverImpl;
 
 public class IndexerApplication {
     public static void main(String[] args) {
-        System.err.close();
+        if (!ApplicationHelper.SHOW_ERROR) {
+            System.err.close();
+        }
+
         DocumentIndexer indexer = new LuceneIndexer();
         boolean forceIndex = args.length > 0 && args[0].equals("-f");
         if (forceIndex || !indexer.hasIndexData(Settings.get("INDEX_PATH"))) {

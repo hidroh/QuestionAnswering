@@ -46,7 +46,10 @@ public class ClassifierApplication {
 			return;
 		}
 
-		System.err.close();
+		if (!ApplicationHelper.SHOW_ERROR) {
+			System.err.close();
+		}
+
 		if (args[0].equals("train")) {
 			train();
 		} else if (args[0].equals("eval")) {

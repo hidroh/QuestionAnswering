@@ -40,7 +40,10 @@ public class Application {
 			return;
 		}
 
-		System.err.close();
+		if (!ApplicationHelper.SHOW_ERROR) {
+			System.err.close();
+		}
+
 		answer(args);
 
 	}

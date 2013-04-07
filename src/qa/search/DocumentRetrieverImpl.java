@@ -50,7 +50,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		}
 
 		List<String> result = new ArrayList<String>();
-		HashMap<String, Integer> docHits = new HashMap<String, Integer>();
+		HashMap<String, Float> docHits = new HashMap<String, Float>();
 
 		ScoreDoc[] topHits;
 		try {
@@ -75,12 +75,8 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				sb.append(";");
 				sb.append(d.get("DOCNO"));
 				
-				if (docHits.containsKey(sb.toString())){
-					docHits.put(sb.toString(), docHits.get(sb.toString()) + 1);
+				docHits.put(sb.toString(), topHits[i].score);
 
-				} else {
-					docHits.put(sb.toString(), 1);
-				}
 				ApplicationHelper.printDebug(String.format("Document id = %s; File name = %s\n", d.get("DOCNO"), d.get("FILENAME")));
 				result.add(d.get("TEXT"));
 				sb = new StringBuilder();
@@ -94,18 +90,18 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		return getDocumentsWithText(result, docHits);
 	}
 
-	private List<qa.model.Document> getDocumentsWithText(List<String> result, HashMap<String, Integer> map) {
+	private List<qa.model.Document> getDocumentsWithText(List<String> result, HashMap<String, Float> map) {
 		int i = 0;
 		
 		ValueComparator bvc = new ValueComparator(map);
-		TreeMap<String,Integer> sortedMap = new TreeMap<String,Integer>(bvc);
+		TreeMap<String,Float> sortedMap = new TreeMap<String,Float>(bvc);
 		
 		sortedMap.putAll(map);
 		
-		Map.Entry<String, Integer> entry = sortedMap.firstEntry();
+		Map.Entry<String, Float> entry = sortedMap.firstEntry();
 		String val = entry.getKey();
-		int hits = entry.getValue();
-		double cutOffScore = Double.parseDouble(Settings.get("HIT_THRESHOLD"))*hits;
+		Float hits = entry.getValue();
+		Float cutOffScore = Float.parseFloat(Settings.get("HIT_THRESHOLD"))*hits;
 		ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
 		
 		sortedMap.remove(val);
@@ -115,8 +111,9 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		
 		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
 		while (!sortedMap.isEmpty()){
-			Map.Entry<String, Integer> tmp = sortedMap.firstEntry();
+			Map.Entry<String, Float> tmp = sortedMap.firstEntry();
 			if (entry.getValue() >= cutOffScore) {
+				ApplicationHelper.printDebug(String.format("%f %s\n", entry.getValue(), tmp.getKey()));
 				ans.add(tmp.getKey());
 				sortedMap.remove(tmp.getKey());
 			} else {
@@ -129,7 +126,6 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			String[] tmp = s.split(";");
 			try {
 				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], getDocumentText(tmp[1], tmp[0]));
-				ApplicationHelper.printDebug(String.format("%s\n", doc.getId()));
 				documentList.add(doc);
 			} catch (FileNotFoundException e) {
 				ApplicationHelper.printError(e);
