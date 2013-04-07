@@ -98,24 +98,19 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		
 		sortedMap.putAll(map);
 		
-		Map.Entry<String, Float> entry = sortedMap.firstEntry();
-		String val = entry.getKey();
-		Float hits = entry.getValue();
-		Float cutOffScore = Float.parseFloat(Settings.get("HIT_THRESHOLD"))*hits;
+		Float topScore = sortedMap.firstEntry().getValue();
+		Float cutOffScore = Float.parseFloat(Settings.get("HIT_THRESHOLD")) * topScore;
 		ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
-		
-		sortedMap.remove(val);
-		
+				
 		ArrayList<String> ans = new ArrayList<String>();
-		ans.add(val);
 		
 		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
 		while (!sortedMap.isEmpty()){
-			Map.Entry<String, Float> tmp = sortedMap.firstEntry();
+			Map.Entry<String, Float> entry = sortedMap.firstEntry();
 			if (entry.getValue() >= cutOffScore) {
-				ApplicationHelper.printDebug(String.format("%f %s\n", entry.getValue(), tmp.getKey()));
-				ans.add(tmp.getKey());
-				sortedMap.remove(tmp.getKey());
+				ApplicationHelper.printDebug(String.format("%f %s\n", entry.getValue(), entry.getKey()));
+				ans.add(entry.getKey());
+				sortedMap.remove(entry.getKey());
 			} else {
 				break;
 			}
