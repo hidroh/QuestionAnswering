@@ -60,7 +60,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
         try {
             indexDirectory = new MMapDirectory(new File(indexPath));
         } catch (IOException e) {
-            ApplicationHelper.printError("Unable to init indexed directory");
+            ApplicationHelper.printError("Unable to init passage indexed directory");
         }
     }
 
@@ -94,22 +94,13 @@ public class PassageRetrieverImpl implements PassageRetriever {
         return false;
     }
 
-    private void indexDocument() {
+    private void indexDocument() throws IOException {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
 
-        try {
-            iw = new IndexWriter(indexDirectory, config);
-            parseDocument(document);
-            iw.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-    }
+        iw = new IndexWriter(indexDirectory, config);
 
-    private void parseDocument(qa.model.Document document) throws IOException {
         ArrayList<Document> docs = new ArrayList<Document>();
-
-        String content = document.getContent().replace("\n\n\n", "|||").replace("\n", " ").replace("|||", "\n");
+        String content = document.getContent().replace("\t", "|||").replace("\n", " ").replace("|||", "\n");
 
         Pattern sentencePattern = Pattern.compile("((?:.*))",
                 Pattern.CASE_INSENSITIVE);
@@ -138,7 +129,9 @@ public class PassageRetrieverImpl implements PassageRetriever {
             }
         }
         
-        iw.addDocuments(docs);        
+        iw.addDocuments(docs);
+
+        iw.close(); 
     }
 
     private String getPassageSentences(Queue<String> passage) {
