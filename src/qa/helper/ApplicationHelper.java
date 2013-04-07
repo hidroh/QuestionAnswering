@@ -15,6 +15,15 @@ public class ApplicationHelper {
         System.out.printf("[ERROR] %s\n", error);
     }
 
+    public static void printError(Exception e) {
+        System.out.printf("[ERROR] %s\n", e.getMessage());
+        if (SHOW_DEBUG) {
+            for (StackTraceElement s : e.getStackTrace()) {
+                System.out.println(s);
+            }
+        }
+    }
+
     public static void printWarning(String warning) {
         System.out.printf("[WARNING] %s\n", warning);   
     }
