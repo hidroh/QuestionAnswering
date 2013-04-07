@@ -105,6 +105,8 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		Map.Entry<String, Integer> entry = sortedMap.firstEntry();
 		String val = entry.getKey();
 		int hits = entry.getValue();
+		double cutOffScore = Double.parseDouble(Settings.get("HIT_THRESHOLD"))*hits;
+		ApplicationHelper.printDebug(String.format("Cut off score = %f\n", cutOffScore));
 		
 		sortedMap.remove(val);
 		
@@ -114,11 +116,11 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		// while next entry is within HIT_THRESHOLD % of this one, return it aswell
 		while (!sortedMap.isEmpty()){
 			Map.Entry<String, Integer> tmp = sortedMap.firstEntry();
-			if (Double.parseDouble(Settings.get("HIT_THRESHOLD"))*hits > entry.getValue()){
-				break;
-			} else {
+			if (entry.getValue() >= cutOffScore) {
 				ans.add(tmp.getKey());
 				sortedMap.remove(tmp.getKey());
+			} else {
+				break;
 			}
 		}
 		
@@ -127,6 +129,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			String[] tmp = s.split(";");
 			try {
 				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], getDocumentText(tmp[1], tmp[0]));
+				ApplicationHelper.printDebug(String.format("%s\n", doc.getId()));
 				documentList.add(doc);
 			} catch (FileNotFoundException e) {
 				ApplicationHelper.printError(e);
