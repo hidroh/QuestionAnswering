@@ -146,6 +146,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 						StringBuilder sb = new StringBuilder();
 						while (!(next = scanner.nextLine()).equals("</TEXT>")) {
 							sb.append(next);
+							sb.append("\n");
 						}
 
 						scanner.close();
