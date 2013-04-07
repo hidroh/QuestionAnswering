@@ -1,0 +1,2 @@
+IN=$1
+for i in $(ls ${IN}); do gzip -drf $i; done
