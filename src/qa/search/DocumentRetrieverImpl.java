@@ -2,9 +2,7 @@ package qa.search;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.lucene.document.Document;
@@ -14,6 +12,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -75,42 +74,19 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 							d.get("FILENAME")
 						)
 					);
-					results.add(new qa.model.DocumentImpl(d.get("DOCNO"), getDocumentText(d.get("DOCNO"), d.get("FILENAME"))));
+					results.add(new qa.model.DocumentImpl(d.get("DOCNO"), d.get("TEXT")));
 				} else {
 					break;
 				}
 			}
 
 			return results;
-		} catch (Exception e) {
-			ApplicationHelper.printError("Document Retriever: Unable to read document from file", e);
+		} catch (ParseException e) {
+			ApplicationHelper.printError("Document Retriever: Unable to parse Lucene query", e);
+		} catch (IOException e) {
+			ApplicationHelper.printError("Document Retriever: Unable to read from index", e);
 		}
 
 		return new ArrayList<qa.model.Document>();
-	}
-
-	private String getDocumentText(String docId, String filePath) throws FileNotFoundException {
-		Scanner scanner = new Scanner(new File(Settings.get("DOCUMENT_PATH"), filePath));
-		while(scanner.hasNextLine()){
-			String next = scanner.nextLine();
-			if (next.contains(docId)){
-				while (scanner.hasNextLine()){
-					next = scanner.nextLine();
-					if (next.contains("<TEXT>")) {
-						StringBuilder sb = new StringBuilder();
-						do {
-							next = scanner.nextLine();
-							sb.append(next);
-							sb.append("\n");
-						} while (!next.contains("</TEXT>"));
-
-						scanner.close();
-						return sb.toString().replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim();
-					}
-				}
-			}
-		}
-		scanner.close();
-		return null;
 	}
 }
