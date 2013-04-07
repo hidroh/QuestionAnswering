@@ -101,6 +101,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
 
         ArrayList<Document> docs = new ArrayList<Document>();
         String content = document.getContent().replace("\t", "|||").replace("\n", " ").replace("|||", "\n");
+        content = document.getContent().replace("<P>", "\n").replace("</P>", "|||").replace("\n", " ").replace("|||", "\n");
 
         Pattern sentencePattern = Pattern.compile("((?:.*))",
                 Pattern.CASE_INSENSITIVE);
@@ -157,7 +158,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
         is.search(query, collector);
         topHits = collector.topDocs().scoreDocs;
 
-        ApplicationHelper.printDebug(String.format("Found %d passage hits\n", topHits.length));
+        ApplicationHelper.printDebug(String.format("Found %d passage hits for %s\n", topHits.length, document.getId()));
         float cutOffScore = -1;
         if (topHits.length > 0) {
             cutOffScore = topHits[0].score * Float.parseFloat(Settings.get("PASSAGE_HIT_THRESHOLD"));
