@@ -91,10 +91,10 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		}
 
 		// result contains the paragraphs with the hits
-		return printResult(result, docHits);
+		return getDocumentsWithText(result, docHits);
 	}
 
-	private List<qa.model.Document> printResult(List<String> result, HashMap<String, Integer> map) {
+	private List<qa.model.Document> getDocumentsWithText(List<String> result, HashMap<String, Integer> map) {
 		int i = 0;
 		
 		ValueComparator bvc = new ValueComparator(map);
@@ -105,7 +105,6 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		Map.Entry<String, Integer> entry = sortedMap.firstEntry();
 		String val = entry.getKey();
 		int hits = entry.getValue();
-		ApplicationHelper.printDebug(val + " "+ hits + "\n");
 		
 		sortedMap.remove(val);
 		
@@ -127,7 +126,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		for (String s : ans){
 			String[] tmp = s.split(";");
 			try {
-				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], findDocument(tmp[1], tmp[0]));
+				qa.model.Document doc = new qa.model.DocumentImpl(tmp[1], getDocumentText(tmp[1], tmp[0]));
 				documentList.add(doc);
 			} catch (FileNotFoundException e) {
 				ApplicationHelper.printError(e);
@@ -137,8 +136,8 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		return documentList;
 	}
 
-	private String findDocument(String docId, String filePath) throws FileNotFoundException {
-		Scanner scanner = new Scanner(new File(filePath));
+	private String getDocumentText(String docId, String filePath) throws FileNotFoundException {
+		Scanner scanner = new Scanner(new File(Settings.get("DOCUMENT_PATH"), filePath));
 		StringBuilder sb = new StringBuilder();
 		while(scanner.hasNextLine()){
 			String next = scanner.nextLine();
@@ -146,13 +145,9 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 				while (scanner.hasNextLine()){
 					next = scanner.nextLine();
 					if (next.contains("<TEXT>")){
-						sb.append(next.replace("<TEXT>", "").replace("<P>", "").replace("</P>", ""));
-						sb.append("\n");
-						
 						while (!next.contains("</TEXT>")){
 							next = scanner.nextLine();
-							sb.append(next.replace("</TEXT>", "").replace("<P>", "").replace("</P>", ""));
-							sb.append("\n");
+							sb.append(next);
 						}
 						scanner.close();
 						return sb.toString().trim();
