@@ -1,0 +1,9 @@
+IN=$1
+OUT=$2
+rm -rf ${OUT}
+mkdir ${OUT}
+for i in $(ls ${IN})
+do
+    echo ${IN}"/"$i" -> "${OUT}"/"$i
+    ./sentence-boundary.pl -d HONORIFICS -i ${IN}/$i -o ${OUT}/$i
+done
