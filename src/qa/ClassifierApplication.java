@@ -176,7 +176,7 @@ public class ClassifierApplication {
 
 	private static QuestionInfo classifyQuestion(String question) {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
-		System.out.printf("\nQ: \"%s\"\n", question);
+		ApplicationHelper.printDebug(String.format("\nQ: \"%s\"\n", question));
 		List<String> classified = classifier.apply(helper.getAllQueryTypes(),
 				helper.getAllQuerySubTypes(), trainingInfo, question);
 		String subClassified = "";

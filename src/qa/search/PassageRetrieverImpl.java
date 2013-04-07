@@ -137,16 +137,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
     private String processDocumentContent() {
         String content = document.getContent();
 
-        int contentType = 0;
-        if (content.indexOf("<P>") > -1 && content.indexOf("</P>") > -1) {
-            contentType = 1;
-        }
-
-        if (contentType == 0) {
-            return content.replace("\t", "|||").replace("\n", " ").replace("|||", "\n");
-        } else {
-            return content.replace("<P>", "\n").replace("</P>", "|||").replace("\n", " ").replace("|||", "\n");
-        }
+        return content;
     }
 
     private String getPassageSentences(Queue<String> passage) {

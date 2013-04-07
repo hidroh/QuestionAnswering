@@ -96,14 +96,15 @@ public class LuceneIndexer implements DocumentIndexer {
 			} else if (nextLine.contains("<DOCNO>")
 					&& nextLine.contains("</DOCNO>")) {
 				docno = nextLine.substring(7, nextLine.length() - 8).trim();
-			} else if (nextLine.equals("<TEXT>") && docno != null) { 
+			} else if (nextLine.contains("<TEXT>") && docno != null) { 
 				StringBuilder sb = new StringBuilder();
-				while (!(nextLine = scanner.nextLine()).equals("</TEXT>")) {
+				do {
+					nextLine = scanner.nextLine();
 					sb.append(nextLine);
-				}
+				} while (!nextLine.contains("</TEXT>"));
 
 				doc = new Document();
-				doc.add(new TextField("TEXT", sb.toString(), Field.Store.YES));
+				doc.add(new TextField("TEXT", sb.toString().replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim(), Field.Store.YES));
 				doc.add(new TextField("DOCNO", docno, Field.Store.YES));
 				doc.add(new StringField("FILENAME", file.getName(), Field.Store.YES));
 

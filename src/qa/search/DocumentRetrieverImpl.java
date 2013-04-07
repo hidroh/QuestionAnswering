@@ -96,15 +96,16 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 			if (next.contains(docId)){
 				while (scanner.hasNextLine()){
 					next = scanner.nextLine();
-					if (next.equals("<TEXT>")) {
+					if (next.contains("<TEXT>")) {
 						StringBuilder sb = new StringBuilder();
-						while (!(next = scanner.nextLine()).equals("</TEXT>")) {
+						do {
+							next = scanner.nextLine();
 							sb.append(next);
 							sb.append("\n");
-						}
+						} while (!next.contains("</TEXT>"));
 
 						scanner.close();
-						return sb.toString().trim();
+						return sb.toString().replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim();
 					}
 				}
 			}
