@@ -73,6 +73,11 @@ public class LuceneIndexer implements DocumentIndexer {
 	}
 
 	private void indexFile(File file) throws IOException {
+		if (file.getName().startsWith(".")) {
+			return;
+		}
+		
+		ApplicationHelper.printDebug(String.format("Indexing %s\n", file.getName()));
 		Scanner scanner = new Scanner(file);
 		Document doc = null;
 		String docno = null;
