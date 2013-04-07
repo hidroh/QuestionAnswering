@@ -123,10 +123,10 @@ public class ClassifierHelper {
 				System.out.printf("Data set: %s [ %d questions]\n",
 						file.getName(), questionCount);
 			} catch (FileNotFoundException e) {
-				System.err.println(String.format("Corpus not found: %s/%s*%s",
+				ApplicationHelper.printError(String.format("Corpus not found: %s/%s*%s",
 						corpusPath, prefix, ext));
 			} catch (IOException e) {
-				System.err.println(String.format(
+				ApplicationHelper.printError(String.format(
 						"Unable to read corpus: %s/%s*%s", corpusPath, prefix,
 						ext));
 			}
@@ -337,9 +337,9 @@ public class ClassifierHelper {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			System.err.println("[WARNING] Unable to find stopword list");
+			ApplicationHelper.printWarning(" Unable to find stopword list");
 		} catch (IOException e) {
-			System.err.println("[WARNING] Unable to read stopword list");
+			ApplicationHelper.printWarning(" Unable to read stopword list");
 		}
 
 		return stopWords;

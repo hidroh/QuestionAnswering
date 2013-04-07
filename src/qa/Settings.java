@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import qa.helper.ApplicationHelper;
+
 public class Settings {
 	private static Properties instance;
 
@@ -14,7 +16,7 @@ public class Settings {
 		try {
 			instance.load(new FileInputStream(file));
 		} catch (IOException e) {
-			System.err.println(String.format(
+			ApplicationHelper.printError(String.format(
 					"Unable to load application settings from %s",
 					file.getAbsolutePath()));
 		}

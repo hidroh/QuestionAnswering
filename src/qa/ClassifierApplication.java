@@ -46,6 +46,7 @@ public class ClassifierApplication {
 			return;
 		}
 
+		System.err.close();
 		if (args[0].equals("train")) {
 			train();
 		} else if (args[0].equals("eval")) {
@@ -142,7 +143,7 @@ public class ClassifierApplication {
 						.println("Operation halted, unable to retrieve trained data");
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			ApplicationHelper.printError(e.getMessage());
 		}
 
 	}
@@ -264,15 +265,15 @@ public class ClassifierApplication {
 				obj_out.writeObject(trainingInfo);
 				obj_out.close();
 			} catch (FileNotFoundException fnfe) {
-				System.err.println("Unable to find training data");
+				ApplicationHelper.printError("Unable to find training data");
 			} catch (IOException ioe) {
-				System.err.println("Unable to read training data");
+				ApplicationHelper.printError("Unable to read training data");
 			}
 
 			System.out.println(trainingInfo);
 			System.out.println("Training all done!");
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			ApplicationHelper.printError(e.getMessage());
 		}
 	}
 
@@ -287,11 +288,11 @@ public class ClassifierApplication {
 				return (ClassifierInfo) obj;
 			}
 		} catch (FileNotFoundException fnfe) {
-			System.err.println("Unable to find trained data");
+			ApplicationHelper.printError("Unable to find trained data");
 		} catch (IOException ioe) {
-			System.err.println("Unable to read trained data");
+			ApplicationHelper.printError("Unable to read trained data");
 		} catch (ClassNotFoundException cnfe) {
-			System.err.println("Corrupted trained data");
+			ApplicationHelper.printError("Corrupted trained data");
 		}
 
 		return null;

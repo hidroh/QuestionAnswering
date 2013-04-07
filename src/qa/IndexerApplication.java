@@ -3,6 +3,7 @@ package qa;
 import java.util.List;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 import qa.indexer.DocumentIndexer;
 import qa.indexer.LuceneIndexer;
 import qa.model.Document;
@@ -11,16 +12,19 @@ import qa.search.DocumentRetrieverImpl;
 
 public class IndexerApplication {
     public static void main(String[] args) {
+        System.err.close();
         DocumentIndexer indexer = new LuceneIndexer();
-        if (!indexer.hasIndexData(Settings.get("INDEX_PATH"))) {
+        if (args.length > 0 && args[0].equals("-f") || !indexer.hasIndexData(Settings.get("INDEX_PATH"))) {
             try {
                 indexer.indexDocuments(Settings.get("DOCUMENT_PATH"));    
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                ApplicationHelper.printError(e.getMessage());
                 return;
             }
         } else {
-            System.out.println("Indexed data exists. To query, run 'java qa.IndexerApplication \"your query\"'");
+            System.out.println("Indexed data exists.");
+            System.out.println("To force reindex, use -f option.");
+            System.out.println("To query, run 'java qa.IndexerApplication \"your query\"'.");
         }
 
         DocumentRetrieverImpl retriever = new DocumentRetrieverImpl();

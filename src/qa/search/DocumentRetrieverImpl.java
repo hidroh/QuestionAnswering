@@ -38,7 +38,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		try {
 			indexDir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
 		} catch (IOException e) {
-			System.err.println("Unable to load indexed data");
+			ApplicationHelper.printError("Unable to load indexed data");
 		}
 	}
 

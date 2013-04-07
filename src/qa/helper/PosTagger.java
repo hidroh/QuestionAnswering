@@ -26,7 +26,7 @@ public class PosTagger {
 					e.printStackTrace();
 				}
 			} catch (java.lang.OutOfMemoryError e) {
-				System.err.println("Out of memory! Retrying...");
+				ApplicationHelper.printError("Out of memory! Retrying...");
 				System.gc();
 			}
 		}

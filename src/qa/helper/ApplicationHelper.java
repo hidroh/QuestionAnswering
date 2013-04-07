@@ -10,4 +10,12 @@ public class ApplicationHelper {
             System.out.print(debugString);    
         }
     }
+
+    public static void printError(String error) {
+        System.out.printf("[ERROR] %s\n", error);
+    }
+
+    public static void printWarning(String warning) {
+        System.out.printf("[WARNING] %s\n", warning);   
+    }
 }

@@ -18,6 +18,7 @@ import org.apache.lucene.util.Version;
 import org.apache.lucene.store.MMapDirectory;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 
 public class LuceneIndexer implements DocumentIndexer {
 	private IndexWriter iw;
@@ -30,7 +31,7 @@ public class LuceneIndexer implements DocumentIndexer {
 		try {
 			dir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
 		} catch (IOException e) {
-			System.err.println("Unable to init indexed directory");
+			ApplicationHelper.printError("Unable to init indexed directory");
 		}
 	}
 

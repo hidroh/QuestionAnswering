@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 import qa.extractor.AnswerExtractor;
 import qa.factory.AnswerExtractorFactory;
 import qa.factory.AnswerExtractorFactoryImpl;
@@ -39,6 +40,7 @@ public class Application {
 			return;
 		}
 
+		System.err.close();
 		answer(args);
 
 	}
@@ -67,7 +69,7 @@ public class Application {
 
 		// index documents if they have not been indexed
 		if (!documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
-			System.err.println("[WARNING] No indexed data found, please check configuration or run IndexerApplication.");
+			ApplicationHelper.printWarning(" No indexed data found, please check configuration or run IndexerApplication.");
 			// documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));
 		}
 
