@@ -10,6 +10,7 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 
 public class NeRecognizer {
     private static NeRecognizer instance;
@@ -29,7 +30,7 @@ public class NeRecognizer {
     }
 
     public List<String> getNameEntities(String text) {
-        text = stripPunctuation(text);
+        text = ApplicationHelper.stripPunctuation(text);
         List<String> results = new ArrayList<String>();
         
         String tagged = classifier.classifyWithInlineXML(text);
@@ -45,18 +46,4 @@ public class NeRecognizer {
         return results;
     }
 
-    private String stripPunctuation(String text) {
-        String result = "";
-        text = text.replace(".", ""); // for abbr
-
-        Pattern wordPattern = Pattern.compile("((?:\\w+))",
-                Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        Matcher m = wordPattern.matcher(text);
-
-        while (m.find()) {
-            result += m.group() + " ";
-        }
-
-        return result;
-    }
 }

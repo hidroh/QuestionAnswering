@@ -48,7 +48,7 @@ public class Application {
 
 	}
 
-	private static void answer(String[] args) {
+	public static void answer(String[] args) {
 		// use factory pattern to create components so that we can easily
 		// swap their underlying implementations later without changing
 		// this code

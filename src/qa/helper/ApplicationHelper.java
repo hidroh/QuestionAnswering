@@ -1,6 +1,8 @@
 package qa.helper;
 
 import qa.Settings;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ApplicationHelper {
     public static boolean SHOW_DEBUG = Boolean.parseBoolean(Settings.get("SHOW_DEBUG_INFO"));
@@ -31,4 +33,18 @@ public class ApplicationHelper {
     public static void printWarning(String warning) {
         System.out.printf("[WARNING] %s\n", warning);   
     }
-}
+
+    public static String stripPunctuation(String text) {
+        String result = "";
+        text = text.replace(".", ""); // for abbr
+
+        Pattern wordPattern = Pattern.compile("((?:\\w+))",
+                Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher m = wordPattern.matcher(text);
+
+        while (m.find()) {
+            result += m.group() + " ";
+        }
+
+        return result;
+    }}
