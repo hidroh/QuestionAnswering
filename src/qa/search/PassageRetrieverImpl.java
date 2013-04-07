@@ -100,8 +100,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
         iw = new IndexWriter(indexDirectory, config);
 
         ArrayList<Document> docs = new ArrayList<Document>();
-        String content = document.getContent().replace("\t", "|||").replace("\n", " ").replace("|||", "\n");
-        content = document.getContent().replace("<P>", "\n").replace("</P>", "|||").replace("\n", " ").replace("|||", "\n");
+        String content = processDocumentContent();
 
         Pattern sentencePattern = Pattern.compile("((?:.*))",
                 Pattern.CASE_INSENSITIVE);
@@ -121,7 +120,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
                 passage.offer(sentence);
             }
 
-            if (passage.size() == passageSize) {
+            if (passage.size() == passageSize || m.groupCount() == 1) {
                 String passageString = getPassageSentences(passage);
                 Document doc = new Document();
                 doc.add(new TextField("PASSAGE", passageString, Field.Store.YES));
@@ -133,6 +132,21 @@ public class PassageRetrieverImpl implements PassageRetriever {
         iw.addDocuments(docs);
 
         iw.close(); 
+    }
+
+    private String processDocumentContent() {
+        String content = document.getContent();
+
+        int contentType = 0;
+        if (content.indexOf("<P>") > -1 && content.indexOf("</P>") > -1) {
+            contentType = 1;
+        }
+
+        if (contentType == 0) {
+            return content.replace("\t", "|||").replace("\n", " ").replace("|||", "\n");
+        } else {
+            return content.replace("<P>", "\n").replace("</P>", "|||").replace("\n", " ").replace("|||", "\n");
+        }
     }
 
     private String getPassageSentences(Queue<String> passage) {
