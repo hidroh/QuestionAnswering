@@ -147,9 +147,11 @@ public class ClassifierHelper {
 			String querySubType = m.group(2);
 			String rawQuestion = m.group(3);
 
-			List<QueryTerm> terms = getQueryTerms(PosTagger.getInstance().tag(
-					rawQuestion));
+			List<QueryTerm> terms = new ArrayList<QueryTerm>();
 			terms.addAll(getPreloadedChunks(chunks));
+			terms.addAll(getNameEntities(rawQuestion));
+			terms.addAll(getQueryTerms(PosTagger.getInstance().tag(
+					rawQuestion)));
 			QuestionInfo questionInfo = new QuestionInfoImpl(
 					QueryType.valueOf(queryType), QuerySubType.valueOf(String
 							.format("%s_%s", queryType, querySubType)), terms,
@@ -159,6 +161,16 @@ public class ClassifierHelper {
 		} else {
 			return null;
 		}
+	}
+
+	public List<QueryTerm> getNameEntities(String raw) {
+		List<String> entities = NeRecognizer.getInstance().getNameEntities(raw);
+		List<QueryTerm> results = new ArrayList<QueryTerm>();
+		for (String entity : entities) {
+			results.add(new QueryTermImpl(entity));
+		}
+
+		return results;
 	}
 
 	public List<QueryTerm> getChunks(String question) {

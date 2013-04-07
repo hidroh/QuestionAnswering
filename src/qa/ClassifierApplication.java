@@ -129,7 +129,7 @@ public class ClassifierApplication {
 											.get("CLASSIFIER_LIMIT")))
 									+ "s] %s\n";
 						}
-						ApplicationHelper.printDebug(
+						System.out.print(
 							String.format(format, subExpected, subClassified,
 								question.getRaw()));
 					}
@@ -183,8 +183,8 @@ public class ClassifierApplication {
 		for (int j = 1; j < classified.size(); j++) {
 			subClassified += String.format("%-15s", classified.get(j));
 		}
-		System.out.printf("Classified as: %s:[%s]\n", classified.get(0),
-				subClassified);
+		ApplicationHelper.printDebug(String.format("Classified as: %s:[%s]\n", classified.get(0),
+				subClassified));
 		return new QuestionInfoImpl(QueryType.valueOf(classified.get(0)),
 				QuerySubType.valueOf(subClassified.trim()),
 				helper.getSearchEngineQueryTerms(question), question);

@@ -186,24 +186,22 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		ClassifierHelper helper = ClassifierHelper.getInstance();
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
 		terms.addAll(helper.getChunks(question));
+		terms.addAll(helper.getNameEntities(question));
 		terms.addAll(helper.getQueryTerms(PosTagger.getInstance().tag(question)));
 		List<String> extracted = new ArrayList<String>();
-		if (ApplicationHelper.SHOW_DEBUG)
-			System.out.print("{ ");
+		ApplicationHelper.printDebug("{ ");
 		for (QueryTerm queryTerm : terms) {
 			String term = queryTerm.getText();
 			if (isStopWord(term)) {
 				continue;
 			}
 
-			if (ApplicationHelper.SHOW_DEBUG)
-				System.out.print(term + ", ");
+			ApplicationHelper.printDebug(term + ", ");
 			if (vocabulary.contains(term)) {
 				extracted.add(term);
 			}
 		}
-		if (ApplicationHelper.SHOW_DEBUG)
-			System.out.println(" }");
+		ApplicationHelper.printDebug(" }");
 
 		return extracted;
 	}
@@ -314,16 +312,13 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 
 		List<String> results = new ArrayList<String>();
 		double scoreThreshold = scoreList.get(0).getValue() / threshold;
-		if (ApplicationHelper.SHOW_DEBUG)
-			System.out.print("Possible classes: ");
+		ApplicationHelper.printDebug("Possible classes: ");	
 		for (int i = 0; i < scoreList.size() && i < resultLimit
 				&& scoreList.get(i).getValue() >= scoreThreshold; i++) {
 			results.add(scoreList.get(i).getKey());
-			if (ApplicationHelper.SHOW_DEBUG)
-				System.out.print(scoreList.get(i).getKey() + ", ");
+			ApplicationHelper.printDebug(scoreList.get(i).getKey() + ", ");
 		}
-		if (ApplicationHelper.SHOW_DEBUG)
-			System.out.println();
+		ApplicationHelper.printDebug("\n");
 
 		return results;
 	}
