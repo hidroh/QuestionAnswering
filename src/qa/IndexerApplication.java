@@ -30,7 +30,7 @@ public class IndexerApplication {
 
                 indexer.indexDocuments(Settings.get("DOCUMENT_PATH"));    
             } catch (Exception e) {
-                ApplicationHelper.printError(e.getMessage());
+                ApplicationHelper.printError("Indexer Application: Unable to index documents", e);
                 return;
             }
         } else {

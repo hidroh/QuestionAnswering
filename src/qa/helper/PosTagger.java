@@ -14,20 +14,16 @@ public class PosTagger {
 		while (!instantiated) {
 			try {
 				String modelPath = Settings.get("POS_TAGGER_MODEL_PATH");
-				// System.out.println(modelPath);
 				try {
 					tagger = new MaxentTagger(modelPath);
 					instantiated = true;
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ApplicationHelper.printError("", e);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ApplicationHelper.printError("POS Tagger: Unable to load model file", e);
 				}
 			} catch (java.lang.OutOfMemoryError e) {
-				ApplicationHelper.printError("Out of memory! Retrying...");
-				System.gc();
+				ApplicationHelper.printError("POS Tagger: Out of memory");
 			}
 		}
 	}

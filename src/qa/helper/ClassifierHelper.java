@@ -53,6 +53,10 @@ public class ClassifierHelper {
 		semanticClasses = new HashMap<String, ArrayList<String>>();
 
 		File folder = new File(Settings.get("SEMANTIC_CLASS_PATH"));
+		if (!folder.exists()) {
+			ApplicationHelper.printError("QuestionClassifier: Unable to load semantic class data");
+		}
+
 		for (File fileEntry : folder.listFiles()) {
 			String semanticClass = fileEntry.getName();
 			BufferedReader br = null;
@@ -67,8 +71,8 @@ public class ClassifierHelper {
 
 					semanticClasses.get(word).add(semanticClass);
 				}
-			} catch (FileNotFoundException e) {
-			} catch (IOException e) {
+			} catch (Exception e) {
+				ApplicationHelper.printError("Question Classifier: Unable to load semantic class data", e);
 			}
 		}
 	}
@@ -123,12 +127,12 @@ public class ClassifierHelper {
 				System.out.printf("Data set: %s [ %d questions]\n",
 						file.getName(), questionCount);
 			} catch (FileNotFoundException e) {
-				ApplicationHelper.printError(String.format("Corpus not found: %s/%s*%s",
-						corpusPath, prefix, ext));
+				ApplicationHelper.printError(String.format("Question Classifier: Corpus not found: %s/%s*%s",
+						corpusPath, prefix, ext), e);
 			} catch (IOException e) {
 				ApplicationHelper.printError(String.format(
-						"Unable to read corpus: %s/%s*%s", corpusPath, prefix,
-						ext));
+						"Question Classifier: Unable to read corpus: %s/%s*%s", corpusPath, prefix,
+						ext), e);
 			}
 
 		}
@@ -337,9 +341,9 @@ public class ClassifierHelper {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			ApplicationHelper.printWarning(" Unable to find stopword list");
+			ApplicationHelper.printWarning("Question Classifier: Unable to find stopword list");
 		} catch (IOException e) {
-			ApplicationHelper.printWarning(" Unable to read stopword list");
+			ApplicationHelper.printWarning("Question Classifier: Unable to read stopword list");
 		}
 
 		return stopWords;

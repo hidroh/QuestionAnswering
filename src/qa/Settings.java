@@ -17,8 +17,8 @@ public class Settings {
 			instance.load(new FileInputStream(file));
 		} catch (IOException e) {
 			ApplicationHelper.printError(String.format(
-					"Unable to load application settings from %s",
-					file.getAbsolutePath()));
+					"Application: Unable to load application settings from %s",
+					file.getAbsolutePath()), e);
 		}
 	}
 

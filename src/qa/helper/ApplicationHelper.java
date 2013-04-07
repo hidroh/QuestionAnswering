@@ -17,8 +17,8 @@ public class ApplicationHelper {
         System.exit(-1);
     }
 
-    public static void printError(Exception e) {
-        System.out.printf("[ERROR] %s\n", e.getMessage());
+    public static void printError(String message, Exception e) {
+        System.out.printf("[ERROR] %s\n%s\n", message, e.getMessage());
         if (SHOW_DEBUG) {
             for (StackTraceElement s : e.getStackTrace()) {
                 System.out.println(s);

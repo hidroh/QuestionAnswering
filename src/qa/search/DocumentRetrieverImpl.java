@@ -34,7 +34,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 		try {
 			indexDir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
 		} catch (IOException e) {
-			ApplicationHelper.printError("Unable to load indexed data");
+			ApplicationHelper.printError("Document Retriever: Unable to load indexed data", e);
 		}
 	}
 
@@ -83,7 +83,7 @@ public class DocumentRetrieverImpl implements DocumentRetriever {
 
 			return results;
 		} catch (Exception e) {
-			ApplicationHelper.printError(e);
+			ApplicationHelper.printError("Document Retriever: Unable to read document from file", e);
 		}
 
 		return new ArrayList<qa.model.Document>();

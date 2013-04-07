@@ -60,7 +60,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
         try {
             indexDirectory = new MMapDirectory(new File(indexPath));
         } catch (IOException e) {
-            ApplicationHelper.printError("Unable to init passage indexed directory");
+            ApplicationHelper.printError("Passage Retriever: Unable to init index directory", e);
         }
     }
 
@@ -73,7 +73,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
 
             return query(answerInfo);
         } catch (Exception e) {
-            ApplicationHelper.printError("Unable to retrieve passages");
+            ApplicationHelper.printError("Passage Retriever: Unable to read passages from index", e);
         }
 
         return new ArrayList<Passage>();

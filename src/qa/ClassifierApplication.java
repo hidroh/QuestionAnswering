@@ -142,11 +142,10 @@ public class ClassifierApplication {
 								testData.size(),
 								(double) subCorrect / testData.size());
 			} else {
-				System.err
-						.println("Operation halted, unable to retrieve trained data");
+				ApplicationHelper.printError("Operation halted, unable to retrieve trained data");
 			}
 		} catch (Exception e) {
-			ApplicationHelper.printError(e.getMessage());
+			ApplicationHelper.printError("Question Classifier: Unable to evaluate", e);
 		}
 
 	}
@@ -268,15 +267,15 @@ public class ClassifierApplication {
 				obj_out.writeObject(trainingInfo);
 				obj_out.close();
 			} catch (FileNotFoundException fnfe) {
-				ApplicationHelper.printError("Unable to find training data");
+				ApplicationHelper.printError("Question Classifier: Unable to find training data", fnfe);
 			} catch (IOException ioe) {
-				ApplicationHelper.printError("Unable to read training data");
+				ApplicationHelper.printError("Question Classifier: Unable to read training data", ioe);
 			}
 
 			System.out.println(trainingInfo);
 			System.out.println("Training all done!");
 		} catch (Exception e) {
-			ApplicationHelper.printError(e.getMessage());
+			ApplicationHelper.printError("Question Classifier: Unable to train classifier", e);
 		}
 	}
 
@@ -291,11 +290,11 @@ public class ClassifierApplication {
 				return (ClassifierInfo) obj;
 			}
 		} catch (FileNotFoundException fnfe) {
-			ApplicationHelper.printError("Unable to find trained data");
+			ApplicationHelper.printError("QuestionClassifier: Unable to find trained data", fnfe);
 		} catch (IOException ioe) {
-			ApplicationHelper.printError("Unable to read trained data");
+			ApplicationHelper.printError("Question Classifier: Unable to read trained data", ioe);
 		} catch (ClassNotFoundException cnfe) {
-			ApplicationHelper.printError("Corrupted trained data");
+			ApplicationHelper.printError("Question Classifier: Corrupted trained data", cnfe);
 		}
 
 		return null;

@@ -30,7 +30,7 @@ public class LuceneIndexer implements DocumentIndexer {
 		try {
 			dir = new MMapDirectory(new File(Settings.get("INDEX_PATH")));
 		} catch (IOException e) {
-			ApplicationHelper.printError("Unable to init indexed directory");
+			ApplicationHelper.printError("Unable to init indexed directory", e);
 		}
 	}
 
@@ -54,7 +54,7 @@ public class LuceneIndexer implements DocumentIndexer {
 	public void indexDocuments(String documentPath) throws Exception {
 		File documentDir = new File(documentPath);
 		if (!(documentDir.exists() && documentDir.isDirectory())) {
-			throw new Exception("Unable to find document directory.");
+			throw new Exception("Document Indexer: Unable to find document directory.");
 		}
 
 		Collection<File> allDocs = new ArrayList<File>();
@@ -67,8 +67,8 @@ public class LuceneIndexer implements DocumentIndexer {
 				indexFile(file);
 			}
 			iw.close();
-		} catch (IOException e1) {
-			ApplicationHelper.printError(e1.getMessage());
+		} catch (IOException e) {
+			ApplicationHelper.printError("Document Indexer: Unable to locate raw documents", e);
 		}
 	}
 
