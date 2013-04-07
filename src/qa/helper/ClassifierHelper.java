@@ -276,6 +276,7 @@ public class ClassifierHelper {
 	}
 
 	public List<QueryTerm> getSearchEngineQueryTerms(String text) {
+		text = processAbbr(text);
 		List<QueryTerm> terms = new ArrayList<QueryTerm>();
 		Pattern wordPattern = Pattern.compile("\\w+", Pattern.CASE_INSENSITIVE
 				| Pattern.DOTALL);
@@ -288,6 +289,10 @@ public class ClassifierHelper {
 		}
 
 		return terms;
+	}
+
+	private String processAbbr(String text) {
+		return text.replace(".", "");
 	}
 
 	private static final List<String> questionWords = new ArrayList<String>(
