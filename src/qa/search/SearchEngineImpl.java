@@ -23,13 +23,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import qa.Settings;
+import qa.helper.ApplicationHelper;
 import qa.model.QuestionInfo;
 import qa.model.QueryTerm;
 import qa.model.enumerator.QuerySubType;
-import qa.model.enumerator.QueryType;
 
 public class SearchEngineImpl implements SearchEngine {
-
+	
+	private static String WEBSEARCH_PARSE_PATTERN_BEG = "\"snippet\": \"";
+	private static String WEBSEARCH_PARSE_PATTERN_END = "\",";
+	private static String STOP_WORDS_FILE_ERROR = "Stop Words file not found/IO Error";
+	
 	private class Tuple {
 		String term;
 		int key;
@@ -39,13 +43,12 @@ public class SearchEngineImpl implements SearchEngine {
 			key = k;
 		}
 	}
-	//HashMap score_Map;
 
 	@Override
 	public String search(QuestionInfo question) {
 
 		ArrayList<String> parsedSnippets;
-		ArrayList<String> candidateTerms;
+		ArrayList<String> taggedNERSnippets;
 		ArrayList<String> textSnippets;
 		ArrayList<String> prunedSnippets;
 		HashMap<String, Integer> term_Freq_Map;
@@ -57,35 +60,87 @@ public class SearchEngineImpl implements SearchEngine {
 		}
 
 		//Search the web for results
-		String response = SearchWeb(queryTerms);
+		ArrayList<String> response = SearchWeb(queryTerms);
 
 		//Parse the response to collect useful data
-		parsedSnippets = Parser(response, "web_search");
-		
+		parsedSnippets = Parser(response, WEBSEARCH_PARSE_PATTERN_BEG, WEBSEARCH_PARSE_PATTERN_END);
+
 		//Remove special characters
 		textSnippets = Extract(parsedSnippets);
-		
+
 		//ANSWER EXTRACTION STEPS
 		//1. Remove Stop words from textSnippets
 		prunedSnippets = RemoveStopWords(textSnippets);
 
 		//2. N-gram mining and ngram-freq
 		term_Freq_Map = NGramTiling(prunedSnippets);
+		//term_Freq_Map = BoostFrequencyScoring(term_Freq_Map);
 
 		//3. Make it log freq
 		term_Freq_Map = LogarithmizeScore(term_Freq_Map);
 
 		//4. NER on textSnippets
-		candidateTerms = ClassifySnippets(textSnippets, question);
-		//candidateTerms = ClassifySnippets(parsedSnippets, question);
+		//candidateTerms = ClassifySnippets(textSnippets, question);
+		taggedNERSnippets = ClassifySnippets(parsedSnippets, question);
 
 		//5. Extract those of Q-type and add to scoring (do novelty scoring)
-		term_Freq_Map = ImproveScoring(term_Freq_Map, candidateTerms, "LOCATION");
-
+		String qType = GetQuestionType(question);		
+		term_Freq_Map = ImproveScoring_MatchQuestionType(term_Freq_Map, taggedNERSnippets, qType);
+	//	System.out.println("Exit freq score");
+		term_Freq_Map = ImproveScoring_DocumentRank(term_Freq_Map, prunedSnippets);
+	//	System.out.println("Exit");
 		//6. Ranking and return top 5;
 		String answer = RankAnwers(term_Freq_Map);
 
 		return answer;
+	}
+
+
+	private HashMap<String, Integer> ImproveScoring_DocumentRank(
+			HashMap<String, Integer> term_Freq_Map,
+			ArrayList<String> prunedSnippets) {
+		int freq = 0;
+	//	System.out.println("enter");
+		//TODO: get only uni-gram for this, for now all the n-grams are taken
+		Set<String> tileSet = term_Freq_Map.keySet();
+		int rank = 0;
+		
+		for( String snip: prunedSnippets){		
+			++rank;
+			for( String tile : tileSet) {				
+				if( snip.contains(tile)){
+					freq = term_Freq_Map.get(tile);
+					freq = freq*((int)Math.log10(20.0/rank));
+					term_Freq_Map.put(tile,  freq);
+				}
+			}
+		}
+		
+		return term_Freq_Map;
+	}
+
+	private String GetQuestionType(QuestionInfo question) {
+		String type = "";
+		
+		switch(question.getQueryType()){
+			case ABBR: type = "ORGANIZATION";break;
+			case DESC: type = "NIL";break;
+			case HUM : type = "PERSON";break;
+			case LOC : type = "LOCATION";break;
+			case ENTY: type = "NIL";break;
+			case NUM : 
+				switch(question.getQuerySubType()){
+					case NUM_date: type = "DATE";break;
+					case NUM_perc: type = "PERCENT";break;
+					case NUM_money: type = "MONEY";break;
+					case NUM_period: type = "TIME";break;
+					default: type = "MONEY";
+				}
+			break;
+			default: type = "";
+		}
+
+		return type;
 	}
 
 
@@ -109,7 +164,7 @@ public class SearchEngineImpl implements SearchEngine {
 		});
 		
 
-		int count = 5;
+		int count = 8;
 		for(Tuple t:list){
 			if(count-- >= 0){
 				ans = ans + t.term + " ";
@@ -117,35 +172,53 @@ public class SearchEngineImpl implements SearchEngine {
 			else {
 				break;
 			}
-		//	System.out.println(t.term + ":" + t.key);
+			//System.out.println(t.term + ":" + t.key);
 		}
 		
-		String finalAns = RemoveDuplicates(ans);
+		String finalAns = RemoveDuplicates(ans);		
+		ApplicationHelper.printDebug("Query Terms: " + finalAns + "\n");
 		
-		System.out.println(finalAns);
 		return finalAns;
 	}
 
 
-	private HashMap<String, Integer> ImproveScoring(
+	private HashMap<String, Integer> ImproveScoring_MatchQuestionType(
 			HashMap<String, Integer> term_Freq_Map,
-			ArrayList<String> candidateTerms, String questionType) {
-
-		ArrayList<String> candidateAns;	
+			ArrayList<String> taggedNERSnippets, String questionType) {
+		//System.out.println("Enter freq score");
+		ArrayList<String> candidateAnsList;	
 		String startTag = "<" + questionType + ">";
 		String endTag = "</" + questionType + ">";
-		candidateAns = Parser(candidateTerms, startTag, endTag);
-		int freq = 0, threshold = 47;;
+		candidateAnsList = Parser(taggedNERSnippets, startTag, endTag);
 		
-		for( String temp : candidateAns){
-			temp = temp.toLowerCase();
-			if(term_Freq_Map.get(temp) != null){
-				freq = term_Freq_Map.get(temp);
-				freq = freq+threshold;
-				term_Freq_Map.put(temp,freq);
-				//System.out.println(temp + ":" +freq );
+		int freq = 0, threshold = 47;
+		String big = "", small = "";
+		
+		Set<String> tileSet = term_Freq_Map.keySet();
+		for( String candidateAns : candidateAnsList){
+			candidateAns = candidateAns.toLowerCase();
+		//	System.out.println("looping: " + temp);
+			for(String item : tileSet){
+				
+				if(candidateAns.length() > item.length()){
+					big = candidateAns;
+					small = item;
+				}
+				else {
+					big = item;
+					small = candidateAns;
+				}
+				
+				if(big.contains(small) == true){
+					freq = term_Freq_Map.get(candidateAns);
+					freq = freq + threshold;
+					term_Freq_Map.put(candidateAns,freq);
+				}
+				
 			}
 		}
+		
+	//	System.out.println("finish loop");
 		return term_Freq_Map;
 	}
 
@@ -172,7 +245,7 @@ public class SearchEngineImpl implements SearchEngine {
 
 	//Forming a single string out of the question terms
 	private String GetQueryTerms(QuestionInfo question) {		
-		String concatTerms = "first woman killed Vietnam War" + " wiki";
+		String concatTerms = "When was TREC found " + " wiki";
 		
 		if(question == null) {
 			return concatTerms;
@@ -185,11 +258,12 @@ public class SearchEngineImpl implements SearchEngine {
 			concatTerms += (term.getText() + " ");
 		}		
 		
-		concatTerms = concatTerms + MapQueryType(question);
-		concatTerms = concatTerms + " " +MapSubQueryType(question);
-		concatTerms = RemoveDuplicates(concatTerms);
+		//concatTerms = concatTerms + MapQueryType(question);
+		concatTerms = MapSubQueryType(question) + " " + concatTerms + " wiki";
+		//concatTerms = RemoveDuplicates(concatTerms);
 		
-		System.out.println("concatTerms: " + concatTerms);
+		ApplicationHelper.printDebug("Web Query Terms: " + concatTerms + "\n");
+
 		return concatTerms;
 	}
 	
@@ -234,7 +308,7 @@ public class SearchEngineImpl implements SearchEngine {
 	}
 	
 	//Searching the web for results
-	private String SearchWeb(String queryTerms) {
+	private ArrayList<String> SearchWeb(String queryTerms) {
 
 		String url = "https://www.googleapis.com/customsearch/v1?"; 
 		String apiKey = Settings.get("GOOGLE_API_KEY"); 
@@ -272,34 +346,17 @@ public class SearchEngineImpl implements SearchEngine {
 				e.printStackTrace();
 			}				
 		}
-		return queryResponse;
-	}
-
-	//Function to get the required information depending on what is parsed-parse_type
-	private ArrayList<String> Parser(String response, String parse_type) {
-
-		String[] list;
-		ArrayList<String> list_to_parse = new ArrayList<String>();
-		String pattern_beg = "", pattern_end = "";
-
-		if(parse_type.compareTo("web_search") == 0){
-			list = response.split("kind");
-			pattern_beg = "\"snippet\": \"";
-			pattern_end = "\"," ;
-		}
 		
-		else {
-			list = response.split(parse_type);
-			//put in pattern type
-		}
+		String[] list = queryResponse.split("kind");
+		ArrayList<String> responseList = new ArrayList<String>();
 		
 		for(String item: list){
-			list_to_parse.add(item);
+			responseList.add(item);
 		}
 
-		return Parser(list_to_parse, pattern_beg, pattern_end);
+		return responseList;
 	}
-
+	
 	private ArrayList<String> Parser(ArrayList<String>list_to_parse, String pattern_beg, 
 			String pattern_end){
 
@@ -328,7 +385,8 @@ public class SearchEngineImpl implements SearchEngine {
 		return parsed_list;
 	}
 
-	//Extracts the text
+	//Extracts the words only from web snippet such that
+	//special characters are removed
 	private ArrayList<String> Extract(ArrayList<String> parsedSnippets) {
 		ArrayList<String> modifiedList = new ArrayList<String>();
 		String matched = "", temp = "";
@@ -348,13 +406,41 @@ public class SearchEngineImpl implements SearchEngine {
 		return modifiedList;
 	}
 
-
+	//Function to remove the stop words from web snippets before ranking is done
+	//so that stop words aren't ranked.
 	private ArrayList<String> RemoveStopWords(ArrayList<String> textSnippets) {
 		String regex = "";
 
 		ArrayList<String> rem;
 		String path = System.getProperty("user.dir");
 		File f = new File(path, Settings.get("STOPWORD_LIST_PATH_SEARCH"));
+		/*
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String line = br.readLine();
+			
+			while(line!=null){
+				regex = regex + " " + line + " |";
+				line = br.readLine();
+			}
+			br.close();			
+			regex = regex.substring(0, regex.length()-1);
+			
+		} catch (FileNotFoundException e) {
+			ApplicationHelper.printError(STOP_WORDS_FILE_ERROR);			
+		} catch (IOException e) {
+			ApplicationHelper.printError(STOP_WORDS_FILE_ERROR);
+		}
+		
+		rem = new ArrayList<String>();
+		for(String item: textSnippets){
+			item = " " + item + " ";
+			item = item.replaceAll(regex, " ").trim();
+			rem.add(item);
+			System.out.println(item);
+		}		
+		return rem;	
+		*/
 		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(f));
@@ -375,16 +461,20 @@ public class SearchEngineImpl implements SearchEngine {
 			br.close();
 		
 		} catch (FileNotFoundException e) {
-			
-			e.printStackTrace();
+			ApplicationHelper.printError(STOP_WORDS_FILE_ERROR);
 		} catch (IOException e) {
-		
-			e.printStackTrace();
+			ApplicationHelper.printError(STOP_WORDS_FILE_ERROR);
 		}
-
+		
+		/*
+		for(String item:textSnippets){
+			System.out.println(item);
+		}
+		*/
 		return textSnippets;
 	}
-
+	
+	
 	private HashMap<String, Integer> NGramTiling(ArrayList<String> parsedSnippets) {
 		HashMap<String, Integer> term_Freq_Map = new HashMap<String, Integer>();
 
@@ -401,8 +491,6 @@ public class SearchEngineImpl implements SearchEngine {
 		if(split == null){
 			return null;
 		}
-
-
 
 		String key = "";
 		//uni-gram tiling and frequency

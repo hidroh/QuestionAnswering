@@ -44,7 +44,7 @@ public class MappingHelper {
 		map.put(QuerySubType.ENTY_word,"");
 		map.put(QuerySubType.HUM_desc,"");
 		map.put(QuerySubType.HUM_gr,"group team");
-		map.put(QuerySubType.HUM_ind,"");
+		map.put(QuerySubType.HUM_ind,"who");
 		map.put(QuerySubType.HUM_title,"title position ");
 		map.put(QuerySubType.LOC_city,"city");
 		map.put(QuerySubType.LOC_country,"country");
@@ -52,7 +52,7 @@ public class MappingHelper {
 		map.put(QuerySubType.LOC_other,"place");
 		map.put(QuerySubType.LOC_state,"state");
 		map.put(QuerySubType.NUM_code,"");
-		map.put(QuerySubType.NUM_count,"amount quantity");
+		map.put(QuerySubType.NUM_count,"amount");
 		map.put(QuerySubType.NUM_date,"date");
 		map.put(QuerySubType.NUM_dist,"");
 		map.put(QuerySubType.NUM_money,"cost amount");
