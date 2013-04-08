@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -78,28 +79,26 @@ public class LuceneIndexer implements DocumentIndexer {
 		}
 		
 		ApplicationHelper.printDebug(String.format("Indexing %s\n", file.getName()));
-		Scanner scanner = new Scanner(file);
+		BufferedReader br = new BufferedReader(new FileReader(file));
 		Document doc = null;
 		String docno = null;
 		ArrayList<Document> docs = null;
-
-		while (scanner.hasNextLine()) {
-			String nextLine = scanner.nextLine();
-
+		String nextLine = "";
+		while ((nextLine = br.readLine()) != null) {
 			if (nextLine.contains("<DOC>")) {
 				docs = new ArrayList<Document>();
 			} else if (nextLine.contains("</DOC>")) {
 				iw.addDocuments(docs);
 				doc = null;
 				docno = null;
-				docs = null;					
+				docs = null;
 			} else if (nextLine.contains("<DOCNO>")
 					&& nextLine.contains("</DOCNO>")) {
 				docno = nextLine.substring(7, nextLine.length() - 8).trim();
 			} else if (nextLine.contains("<TEXT>") && docno != null) { 
 				StringBuilder sb = new StringBuilder();
 				do {
-					nextLine = scanner.nextLine();
+					nextLine = br.readLine();
 					sb.append(nextLine.replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim());
 					sb.append("\n");
 				} while (!nextLine.contains("</TEXT>"));
@@ -115,7 +114,7 @@ public class LuceneIndexer implements DocumentIndexer {
 			}
 		}
 
-		scanner.close();
+		br.close();
 
 	}
 
