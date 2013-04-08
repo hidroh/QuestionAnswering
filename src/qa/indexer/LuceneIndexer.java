@@ -100,11 +100,12 @@ public class LuceneIndexer implements DocumentIndexer {
 				StringBuilder sb = new StringBuilder();
 				do {
 					nextLine = scanner.nextLine();
-					sb.append(nextLine);
+					sb.append(nextLine.replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim());
+					sb.append("\n");
 				} while (!nextLine.contains("</TEXT>"));
 
 				doc = new Document();
-				doc.add(new TextField("TEXT", sb.toString().replace("</TEXT>", "").replace("<P>", "").replace("</P>", "").trim(), Field.Store.YES));
+				doc.add(new TextField("TEXT", sb.toString(), Field.Store.YES));
 				doc.add(new TextField("DOCNO", docno, Field.Store.YES));
 				doc.add(new StringField("FILENAME", file.getName(), Field.Store.YES));
 
