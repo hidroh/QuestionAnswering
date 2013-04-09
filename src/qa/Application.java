@@ -132,9 +132,14 @@ public class Application {
 
 	private static void printResults(String question, List<ResultInfo> results) {
 		System.out.printf("\nQ: \"%s\"\n", question);
-		System.out.println("A(s):");
+		System.out.print("A(s):");
 		for (ResultInfo resultInfo : results) {
-			System.out.printf("[%s]\n%s\n\n", resultInfo.getSupportingDocumentId(), resultInfo.getAnswer());
+			System.out.printf("%s / ", resultInfo.getAnswer());
 		}
+		System.out.println();
+		// System.out.println("A(s):");
+		// for (ResultInfo resultInfo : results) {
+		// 	System.out.printf("[%s]\n%s\n\n", resultInfo.getSupportingDocumentId(), resultInfo.getAnswer());
+		// }
 	}
 }
