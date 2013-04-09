@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -85,10 +84,10 @@ public class SearchEngineImpl implements SearchEngine {
 
 		//Parse the response to collect useful data
 		if (Settings.get("SEARCH_METHOD").equals("api")) {
-			parsedSnippets = Parser(response, WEBSEARCH_PARSE_PATTERN_BEG, WEBSEARCH_PARSE_PATTERN_END);			
+			parsedSnippets = Parser(response, WEBSEARCH_PARSE_PATTERN_BEG, WEBSEARCH_PARSE_PATTERN_END);
 		} else {
 			parsedSnippets = new ArrayList<String>();
-			parsedSnippets.add(ApplicationHelper.getWebSearchApplication().search(queryTerms));			
+			parsedSnippets.add(ApplicationHelper.getWebSearchApplication().search(queryTerms));
 		}
 
 		//Remove special characters
