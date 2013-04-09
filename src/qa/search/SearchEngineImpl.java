@@ -72,7 +72,7 @@ public class SearchEngineImpl implements SearchEngine {
 		queryTerms = queryTerms.toLowerCase();
 		queryTerms = RemoveDuplicates(queryTerms);
 		//queryTerms = queryTerms.replaceAll(" wiki ", " ");
-		System.out.println(queryTerms);		
+		ApplicationHelper.printlnDebug(queryTerms);		
 		
 		return queryTerms;
 	}
@@ -149,7 +149,7 @@ public class SearchEngineImpl implements SearchEngine {
 	//to printout an array list of strings
 	private void TestPrint(ArrayList<String> arr){
 		for(String item: arr){
-				System.out.println(item);
+				ApplicationHelper.printlnDebug(item);
 		}
 	}
 
@@ -174,7 +174,7 @@ public class SearchEngineImpl implements SearchEngine {
 		}
 
 //		for( String item : tileSet){
-//			System.out.println(item + ":" + term_Freq_Map.get(item));
+//			ApplicationHelper.printlnDebug(item + ":" + term_Freq_Map.get(item));
 //		}
 
 		return term_Freq_Map;
@@ -224,7 +224,7 @@ public class SearchEngineImpl implements SearchEngine {
 			}
 		});
 
-		System.out.println("---------------------");
+		ApplicationHelper.printlnDebug("---------------------");
 		int count = 8;
 		for(Tuple t:list){
 			if(count-- >= 0){
@@ -233,7 +233,7 @@ public class SearchEngineImpl implements SearchEngine {
 			else {
 				break;
 			}
-			System.out.println(t.term + ":" + t.key);
+			ApplicationHelper.printlnDebug(t.term + ":" + t.key);
 		}
 		
 		
@@ -268,7 +268,7 @@ public class SearchEngineImpl implements SearchEngine {
 				
 			}
 			
-			System.out.println(item + ":" + term_Freq_Map.get(item));
+			ApplicationHelper.printlnDebug(item + ":" + term_Freq_Map.get(item));
 		}
 		return term_Freq_Map;
 	}
@@ -286,7 +286,7 @@ public class SearchEngineImpl implements SearchEngine {
 
 		/*
 		for( String temp : set_of_ngrams){
-			System.out.println(temp + " : " + term_Freq_Map.get(temp));		
+			ApplicationHelper.printlnDebug(temp + " : " + term_Freq_Map.get(temp));		
 		}
 		 */
 
@@ -314,7 +314,7 @@ public class SearchEngineImpl implements SearchEngine {
 		//concatTerms = RemoveDuplicates(concatTerms);
 
 		ApplicationHelper.printDebug("Web Query Terms: " + concatTerms + "\n");
-		System.out.println("concatTerms: " + concatTerms);
+		ApplicationHelper.printlnDebug("concatTerms: " + concatTerms);
 		return concatTerms;
 	}
 
@@ -588,7 +588,7 @@ public class SearchEngineImpl implements SearchEngine {
 
 		/*
 		for(String t : annotatedSnippets){
-					System.out.println(t);
+					ApplicationHelper.printlnDebug(t);
 		}
 		 */
 		return annotatedSnippets;

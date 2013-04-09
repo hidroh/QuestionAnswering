@@ -20,6 +20,12 @@ public class ApplicationHelper {
         }
     }
 
+    public static void printlnDebug(String debugString) {
+        if (SHOW_DEBUG) {
+            System.out.println(debugString);    
+        }
+    }
+
     public static void printError(String error) {
         System.out.printf("[ERROR] %s\n", error);
         System.exit(-1);
