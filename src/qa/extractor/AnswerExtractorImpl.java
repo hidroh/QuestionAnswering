@@ -54,7 +54,18 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         this.searchEngine = searchEngine;
         sa = new StandardAnalyzer(Version.LUCENE_41);
         try {
-            dir = new MMapDirectory(new File(Settings.get("ANSWER_INDEX_PATH")));
+            File indexDir = new File(Settings.get("ANSWER_INDEX_PATH"));
+            if (!indexDir.exists()) {
+                indexDir.mkdir();
+            }
+
+            if (indexDir.isDirectory()) {
+                for (File f : indexDir.listFiles()) {
+                    f.delete();
+                }
+            }
+
+            dir = new MMapDirectory(indexDir);
         } catch (IOException e) {
             ApplicationHelper.printError("Unable to init indexed directory", e);
         }
@@ -66,48 +77,61 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         Map<String, String> answerInfo = new HashMap<String, String>();
         List<ResultInfo> results = new ArrayList<ResultInfo>();
         for (Passage passage : passages) {
-            answerInfo.put(passage.getContent(), passage.getDocumentId());
+            List<String> nameEntities = NeRecognizer.getInstance().getNameEntities(passage.getContent());
+            for (String entity : nameEntities) {
+                answerInfo.put(entity, passage.getDocumentId());
+            }
         }
 
-        for (Map.Entry<String, String> aInfo : answerInfo.entrySet()) {
-            try {
-                String answer = getAnswer(aInfo.getKey(), questionInfo);
-                if (answer.length() > 0) {
-                    results.add(new ResultInfoImpl(answer, aInfo.getValue()));    
-                }                
-            } catch (Exception e) {
-                ApplicationHelper.printError("Answer Extractor: Unable to rank answers", e);
+        try {
+            String taggedAnswer = getAnswer(new ArrayList<String>(answerInfo.keySet()), questionInfo);
+            if (taggedAnswer.length() > 0) {
+                results.add(new ResultInfoImpl(stripTag(taggedAnswer), answerInfo.get(taggedAnswer)));    
             }
+
+            // adding alternative results for reference
+            String alt = "{";
+            for (String alternative : answerInfo.keySet()) {
+                alt += stripTag(alternative) + "; ";
+            }
+            alt += "}";
+            results.add(new ResultInfoImpl(alt, "alt"));    
+
+        } catch (Exception e) {
+            ApplicationHelper.printError("Answer Extractor: Unable to rank answers", e);
         }
 
         return results;
     }
 
-    private String getAnswer(String passage, QuestionInfo info) throws Exception {
-        List<String> nameEntities = NeRecognizer.getInstance().getNameEntities(passage);
+    private String stripTag(String tagged) {
+        return tagged.replaceAll("<\\w+>", "").replaceAll("</\\w+>", "").trim();
+    }
 
-        List<String> answers = mapAnswer(nameEntities, info);
-        if (answers.size() > 0) {
-            return rankAnswers(answers, info);    
+    private String getAnswer(List<String> nameEntities, QuestionInfo info) throws Exception {
+        List<String> taggedAnswers = mapAnswer(nameEntities, info);
+        if (taggedAnswers.size() > 0) {
+            return rankAnswers(taggedAnswers, info);    
         }
         
         return "";
     }
 
-    private String rankAnswers(List<String> answers, QuestionInfo info) throws Exception {
+    private String rankAnswers(List<String> taggedAnswers, QuestionInfo info) throws Exception {
         String webQueryPrefix = getQuestionChunks(info.getRaw());
 
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
         iw = new IndexWriter(dir, config);
 
-        for (String answer : answers) {
+        for (String taggedAnswer : taggedAnswers) {
+            String answer = stripTag(taggedAnswer);
             String webResult = searchEngine.search(webQueryPrefix + answer);
-            addIndex(answer, webResult);
+            addIndex(taggedAnswer, webResult);
         }
 
         iw.close();
 
-        return getTopResult(webQueryPrefix, answers.size());
+        return getTopResult(webQueryPrefix, taggedAnswers.size());
     }
 
     private String getQuestionChunks(String question) {
@@ -183,14 +207,12 @@ public class AnswerExtractorImpl implements AnswerExtractor {
             if (types.size() > 0) {
                 for (String type : types) {
                     if (answer.contains("<" + type + ">")) {
-                        answer = answer.replace("<" + type + ">", "").replace("</" + type + ">", "").trim();
                         if (!results.contains(answer)) {
                             results.add(answer);
                         }
                     }
                 }
             } else {
-                answer = answer.replaceAll("<\\w+>", "").replaceAll("</\\w+>", "").trim();
                 if (!results.contains(answer)) {
                     results.add(answer);
                 }                

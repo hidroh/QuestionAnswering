@@ -26,8 +26,7 @@ public abstract class WebSearchApplication {
 
     public String search(String query) {
         try {
-            System.out.print(String.format("Search %s for \"%s\n\"", searchEngineName, query));
-            // ApplicationHelper.printDebug(String.format("Search %s for \"%s\n\"", searchEngineName, query));
+            ApplicationHelper.printDebug(String.format("Search %s for \"%s\"\n", searchEngineName, query));
             String result = "";
             query = ApplicationHelper.stripPunctuation(query).trim().replace(" ", "+");
             List<String> queries = new ArrayList<String>();
@@ -44,11 +43,9 @@ public abstract class WebSearchApplication {
 
             return result.trim();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ApplicationHelper.printWarning(String.format("Answer Extractor: Unable to validate answer - %s", e.getMessage()));
         }
 
-        ApplicationHelper.printWarning("Answer Extractor: Unable to validate answer");
         return "";
     }
 

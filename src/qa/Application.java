@@ -134,12 +134,9 @@ public class Application {
 		System.out.printf("\nQ: \"%s\" [%s, %s]\n", questionInfo.getRaw(), questionInfo.getQueryType(), questionInfo.getQuerySubType());
 		System.out.print("A(s):");
 		for (ResultInfo resultInfo : results) {
-			System.out.printf("%s / ", resultInfo.getAnswer());
+			System.out.printf("%s [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());
 		}
 		System.out.println();
-		// System.out.println("A(s):");
-		// for (ResultInfo resultInfo : results) {
-		// 	System.out.printf("[%s]\n%s\n\n", resultInfo.getSupportingDocumentId(), resultInfo.getAnswer());
-		// }
+		System.out.println("-----------");
 	}
 }
