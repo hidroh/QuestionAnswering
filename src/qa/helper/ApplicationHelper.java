@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 public class ApplicationHelper {
     public static boolean SHOW_DEBUG = Boolean.parseBoolean(Settings.get("SHOW_DEBUG_INFO"));
     public static boolean SHOW_ERROR = Boolean.parseBoolean(Settings.get("SHOW_ERROR"));
+    public static boolean QUERY_REFORMULATION = Boolean.parseBoolean(Settings.get("QUERY_REFORMULATION"));
 
     public static void printDebug(String debugString) {
         if (SHOW_DEBUG) {

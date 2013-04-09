@@ -73,7 +73,6 @@ public class Application {
 		// index documents if they have not been indexed
 		if (!documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
 			ApplicationHelper.printWarning(" No indexed data found, please check configuration or run IndexerApplication.");
-			// documentIndexer.indexDocuments(Settings.get("DOCUMENT_PATH"));
 		}
 
 		// init passage retriever factory
@@ -89,7 +88,10 @@ public class Application {
 			QuestionInfo questionInfo = questionParser.parse(question);
 
 			// use search engine to reformulate original query
-			String irQuery = searchEngine.search(questionInfo);
+			String irQuery = ApplicationHelper.stripPunctuation(questionInfo.getRaw());
+			if (ApplicationHelper.QUERY_REFORMULATION) {
+				irQuery = searchEngine.search(questionInfo);
+			}
 
 			// get set of relevant documents based on reformulated query
 			List<Document> relevantDocs = new ArrayList<Document>();
