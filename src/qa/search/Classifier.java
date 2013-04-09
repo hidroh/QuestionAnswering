@@ -2,7 +2,6 @@ package qa.search;
 
 import java.util.ArrayList;
 
-import qa.Settings;
 import qa.helper.NeRecognizer;
 
 public class Classifier {

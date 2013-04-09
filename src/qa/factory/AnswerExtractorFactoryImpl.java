@@ -3,7 +3,6 @@ package qa.factory;
 import qa.extractor.AnswerExtractor;
 import qa.extractor.AnswerExtractorImpl;
 import qa.search.web.WebSearchApplication;
-import qa.Settings;
 import qa.helper.ApplicationHelper;
 
 public class AnswerExtractorFactoryImpl implements AnswerExtractorFactory {
