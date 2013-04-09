@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import qa.Settings;
 import qa.helper.ApplicationHelper;
-import qa.model.ResultInfo;
 
 public class TestApplication {
     public static void main(String[] args) { 
