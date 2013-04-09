@@ -29,6 +29,15 @@ import qa.search.PassageRetriever;
 import qa.search.SearchEngine;
 
 public class Application {
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_BLACK = "\u001B[30m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
 
 	/**
 	 * @param args
@@ -44,11 +53,14 @@ public class Application {
 			System.err.close();
 		}
 
-		answer(args);
+		answer(args, null, false);
 
 	}
 
-	public static void answer(String[] args) {
+	public static void answer(String[] args, List<String> sampleAnswers, boolean color) {
+		// initialize variables to store answers
+		List<ResultInfo> results = new ArrayList<ResultInfo>();
+
 		// use factory pattern to create components so that we can easily
 		// swap their underlying implementations later without changing
 		// this code
@@ -83,7 +95,13 @@ public class Application {
 		AnswerExtractor answerExtractor = aeFactory.createAnswerExtractor();
 
 		// get answers for each input question
-		for (String question : args) {
+		for (int i = 0; i < args.length; i++) {
+			String question = args[i];
+			String sampleAnswer = null;
+			if (sampleAnswers != null) {
+				sampleAnswer = sampleAnswers.get(i);
+			}
+
 			// parse question to get expanded query and query type
 			QuestionInfo questionInfo = questionParser.parse(question);
 
@@ -98,9 +116,6 @@ public class Application {
 			if (documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
 				relevantDocs = documentRetriever.getDocuments(irQuery);
 			}
-
-			// initialize variables to store answers
-			List<ResultInfo> results = new ArrayList<ResultInfo>();
 
 			// from this set of document, narrow down result set by
 			// filtering
@@ -118,7 +133,7 @@ public class Application {
 					questionInfo, irQuery));
 
 			// print out results for this question
-			printResults(questionInfo, results);
+			printResults(questionInfo, sampleAnswer, results, color);
 		}
 	}
 
@@ -132,11 +147,29 @@ public class Application {
 				.println("Example: java Application \"Where is Milan ?\" \"Who developed the Macintosh computer ?\" ");
 	}
 
-	private static void printResults(QuestionInfo questionInfo, List<ResultInfo> results) {
-		System.out.printf("\nQ: \"%s\" [%s]\n", questionInfo.getRaw(), questionInfo.getMultiClassification());
-		System.out.print("A(s):");
+	private static void printResults(QuestionInfo questionInfo, String sampleAnswer, List<ResultInfo> results, boolean color) {
+		if (color) {
+			System.out.printf("\nQ: "+ANSI_CYAN+"\"%s\""+ANSI_RESET+" [%s]\n", questionInfo.getRaw(), questionInfo.getMultiClassification());
+		} else {
+			System.out.printf("\nQ: \"%s\" [%s]\n", questionInfo.getRaw(), questionInfo.getMultiClassification());
+		}
+
+		if (sampleAnswer != null) {
+			if (color) {
+				System.out.printf("A(s): " + ANSI_GREEN + "%s" + ANSI_RESET + "\n", sampleAnswer);	
+			} else {
+				System.out.printf("A(s): %s\n", sampleAnswer);
+			}
+			
+		}
+
+		System.out.print("R(s):");
 		for (ResultInfo resultInfo : results) {
-			System.out.printf("%s [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());
+			if (color) {
+				System.out.printf(ANSI_RED + "%s"+ANSI_RESET+" [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());				
+			} else {
+				System.out.printf("%s [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());			
+			}
 		}
 		System.out.println();
 		System.out.println("-----------");
