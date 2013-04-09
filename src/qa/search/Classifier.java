@@ -2,11 +2,8 @@ package qa.search;
 
 import java.util.ArrayList;
 
-import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import edu.stanford.nlp.ie.crf.CRFClassifier;
-import edu.stanford.nlp.ling.CoreLabel;
-
 import qa.Settings;
+import qa.helper.NeRecognizer;
 
 public class Classifier {
 	
@@ -17,12 +14,8 @@ public class Classifier {
 	}
 	
 	public ArrayList<String> Classify(ArrayList<String> input){
-		
-		String serializedClassifier = Settings.get("CLASSIFIER_PATH_SEARCH_ENGINE");
-		AbstractSequenceClassifier<CoreLabel> classifier = CRFClassifier.getClassifierNoExceptions(serializedClassifier);
-		
 		for(String snip : input){
-			list.add(classifier.classifyWithInlineXML(snip));
+			list.add(NeRecognizer.getInstance().tag(snip));
 		}
 
 		return list;

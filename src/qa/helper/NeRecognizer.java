@@ -46,4 +46,10 @@ public class NeRecognizer {
         return results;
     }
 
+    public String tag(String text) {
+        text = ApplicationHelper.stripPunctuation(text);
+        List<String> results = new ArrayList<String>();
+        
+        return classifier.classifyWithInlineXML(text);
+    }
 }
