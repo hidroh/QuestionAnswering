@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -25,7 +24,6 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -38,16 +36,12 @@ import qa.model.ResultInfo;
 import qa.model.Passage;
 import qa.model.ResultInfoImpl;
 import qa.helper.NeRecognizer;
-import qa.model.enumerator.QueryType;
-import qa.model.enumerator.QuerySubType;
-import qa.model.QueryTerm;
 import qa.helper.ApplicationHelper;
 
 public class AnswerExtractorImpl implements AnswerExtractor {
     private IndexWriter iw;
     private StandardAnalyzer sa;
     private Directory dir;
-    private Map<String, String> answerInfo;
     private WebSearchApplication searchEngine;
 
     public AnswerExtractorImpl(WebSearchApplication searchEngine) {
@@ -144,8 +138,8 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         ArrayList<String> questionWords = new ArrayList<String>(
                 Arrays.asList(new String[] { "how", "what",
                         "who", "which", "where", "when" }));
-        ArrayList<String> stopWords = new ArrayList<String>(
-                Arrays.asList(new String[] { "[PP", "[SBAR" }));
+        // ArrayList<String> stopWords = new ArrayList<String>(
+        //         Arrays.asList(new String[] { "[PP", "[SBAR" }));
         while (m.find()) {
             String chunk = m.group();
 
@@ -238,6 +232,8 @@ public class AnswerExtractorImpl implements AnswerExtractor {
                     case HUM_gr: // Organization
                         types.add("ORGANIZATION");
                         break;
+					default:
+						break;
                 }
                 break;
             case NUM:
@@ -253,8 +249,12 @@ public class AnswerExtractorImpl implements AnswerExtractor {
                     case NUM_perc: // Percent
                         types.add("PERCENT");
                         break;
+					default:
+						break;
                 }
                 break;
+			default:
+				break;
         }
 
         return types;
