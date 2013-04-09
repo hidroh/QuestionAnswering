@@ -133,7 +133,7 @@ public class Application {
 	}
 
 	private static void printResults(QuestionInfo questionInfo, List<ResultInfo> results) {
-		System.out.printf("\nQ: \"%s\" [%s, %s]\n", questionInfo.getRaw(), questionInfo.getQueryType(), questionInfo.getQuerySubType());
+		System.out.printf("\nQ: \"%s\" [%s]\n", questionInfo.getRaw(), questionInfo.getMultiClassification());
 		System.out.print("A(s):");
 		for (ResultInfo resultInfo : results) {
 			System.out.printf("%s [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());

@@ -29,4 +29,7 @@ public interface QuestionInfo {
 	QuerySubType getQuerySubType();
 
 	String getRaw();
+
+	String getMultiClassification();
+	void setMultiClassification(String multiClassification);
 }

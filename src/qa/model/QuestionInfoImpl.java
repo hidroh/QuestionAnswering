@@ -10,6 +10,7 @@ public class QuestionInfoImpl implements QuestionInfo {
 	private QueryType queryType;
 	private QuerySubType querySubType;
 	private String raw;
+	private String multiClassification;
 	
 	public QuestionInfoImpl(QueryType queryType, QuerySubType querySubType, List<QueryTerm> terms, String raw) {
 		this.terms = terms;
@@ -36,6 +37,14 @@ public class QuestionInfoImpl implements QuestionInfo {
 	@Override
 	public String getRaw() {
 		return raw;
+	}
+
+	public String getMultiClassification() {
+		return multiClassification;
+	}
+
+	public void setMultiClassification(String multiClassification) {
+		this.multiClassification = multiClassification;
 	}
 
 	public String toString() {

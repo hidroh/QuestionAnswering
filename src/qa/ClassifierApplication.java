@@ -180,14 +180,24 @@ public class ClassifierApplication {
 		List<String> classified = classifier.apply(helper.getAllQueryTypes(),
 				helper.getAllQuerySubTypes(), trainingInfo, question);
 		String subClassified = "";
-		for (int j = 1; j < classified.size(); j++) {
-			subClassified += String.format("%-15s", classified.get(j));
+		String multiClassification = "";
+		for (String c : classified) {
+			multiClassification += c + " ";
+		}
+
+		for (int j = 0; j < classified.size(); j++) {
+			if (classified.get(j).contains("_")) {
+				subClassified = classified.get(j);
+				break;
+			}
 		}
 		ApplicationHelper.printDebug(String.format("Classified as: %s:[%s]\n", classified.get(0),
 				subClassified));
-		return new QuestionInfoImpl(QueryType.valueOf(classified.get(0)),
+		QuestionInfo qInfo = new QuestionInfoImpl(QueryType.valueOf(classified.get(0)),
 				QuerySubType.valueOf(subClassified.trim()),
 				helper.getSearchEngineQueryTerms(question), question);
+		qInfo.setMultiClassification(multiClassification);
+		return qInfo;
 	}
 
 	private static void setClassifier() {

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import qa.Settings;
 import qa.model.ClassifierInfo;
 import qa.model.ClassifierInfoImpl;
 import qa.model.QueryTerm;
@@ -20,8 +22,8 @@ import qa.helper.ApplicationHelper;
 
 public class QuestionClassifierImpl implements QuestionClassifier {
 	private List<String> stopWords;
-	private double threshold = 1.0;
-	private int resultLimit = 1;
+	private double threshold = Double.parseDouble(Settings.get("CLASSIFIER_THRESHOLD"));
+	private int resultLimit = Integer.parseInt(Settings.get("CLASSIFIER_LIMIT"));
 
 	public QuestionClassifierImpl() {
 	}
@@ -118,16 +120,8 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		boolean IS_SUB_TYPE = false;
-		// String queryTypeString = getClassification(strQueryTypes,
-		// trainingInfo,
-		// terms, IS_SUB_TYPE);
 		List<String> classifiedTypes = getMultiClassification(strQueryTypes,
 				trainingInfo, terms, IS_SUB_TYPE);
-
-		// List<String> strQuerySubTypes = new ArrayList<String>();
-		// for (QuerySubType t : querySubTypes) {
-		// strQuerySubTypes.add(t.toString());
-		// }
 
 		List<String> strQuerySubTypes = new ArrayList<String>();
 		for (QuerySubType t : querySubTypes) {
@@ -140,14 +134,11 @@ public class QuestionClassifierImpl implements QuestionClassifier {
 		}
 
 		IS_SUB_TYPE = true;
-		// String querySubTypeString = getClassification(strQuerySubTypes,
-		// trainingInfo, terms, IS_SUB_TYPE);
-		// return new String[] { queryTypeString, querySubTypeString };
 		List<String> classifiedSubTypes = getMultiClassification(
 				strQuerySubTypes, trainingInfo, terms, IS_SUB_TYPE);
 
 		List<String> results = new ArrayList<String>();
-		results.add(classifiedTypes.get(0));
+		results.addAll(classifiedTypes);
 		results.addAll(classifiedSubTypes);
 		return results;
 	}

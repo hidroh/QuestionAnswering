@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -37,6 +39,8 @@ import qa.model.Passage;
 import qa.model.ResultInfoImpl;
 import qa.helper.NeRecognizer;
 import qa.helper.ApplicationHelper;
+import qa.model.enumerator.QueryType;
+import qa.model.enumerator.QuerySubType;
 
 public class AnswerExtractorImpl implements AnswerExtractor {
     private IndexWriter iw;
@@ -196,7 +200,13 @@ public class AnswerExtractorImpl implements AnswerExtractor {
 
     private List<String> mapAnswer(List<String> answers, QuestionInfo info) {
         List<String> results = new ArrayList<String>();
-        List<String> types = getEntityType(info);
+        List<String> types = new ArrayList<String>();
+        if (Integer.parseInt(Settings.get("CLASSIFIER_LIMIT")) == 1) {
+            types.addAll(getEntityType(info));
+        } else {
+            types.addAll(getMultiEntityType(info));
+        }
+
         for (String answer : answers) {
             if (types.size() > 0) {
                 for (String type : types) {
@@ -258,5 +268,59 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         }
 
         return types;
+    }
+
+    private List<String> getMultiEntityType(QuestionInfo info) {
+        String[] classified = info.getMultiClassification().split(" ");
+        Set<String> types = new HashSet<String>();
+        for (String c : classified) {
+            if (!c.contains("_")) {
+                QueryType qt = QueryType.valueOf(c);
+                switch (qt) {
+                    case LOC: // Location
+                        types.add("LOCATION");
+                        break;
+                    case HUM:
+                        types.add("PERSON");
+                        types.add("ORGANIZATION");
+                        break;
+                    case NUM:
+                        types.add("TIME");
+                        types.add("DATE");
+                        types.add("MONEY");
+                        types.add("PERCENT");
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                QuerySubType qst = QuerySubType.valueOf(c);
+                switch (qst) {
+                    case HUM_ind: // Person
+                    case HUM_desc:
+                    case HUM_title:
+                        types.add("PERSON");
+                        break;
+                    case HUM_gr: // Organization
+                        types.add("ORGANIZATION");
+                        break;
+                    case NUM_date: // Time / Date
+                    case NUM_period:
+                        types.add("TIME");
+                        types.add("DATE");
+                        break;
+                    case NUM_money: // Money
+                        types.add("MONEY");
+                        break;
+                    case NUM_perc: // Percent
+                        types.add("PERCENT");
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        return new ArrayList<String>(types);
     }
 }
