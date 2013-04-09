@@ -84,7 +84,12 @@ public class SearchEngineImpl implements SearchEngine {
 		ArrayList<String> response = SearchWeb(queryTerms);
 
 		//Parse the response to collect useful data
-		parsedSnippets = Parser(response, WEBSEARCH_PARSE_PATTERN_BEG, WEBSEARCH_PARSE_PATTERN_END);
+		if (Settings.get("SEARCH_METHOD").equals("api")) {
+			parsedSnippets = Parser(response, WEBSEARCH_PARSE_PATTERN_BEG, WEBSEARCH_PARSE_PATTERN_END);			
+		} else {
+			parsedSnippets = new ArrayList<String>();
+			parsedSnippets.add(ApplicationHelper.getWebSearchApplication().search(queryTerms));			
+		}
 
 		//Remove special characters
 		plainTextSnippets = Extract(parsedSnippets);

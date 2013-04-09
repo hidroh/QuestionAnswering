@@ -1,6 +1,10 @@
 package qa.helper;
 
 import qa.Settings;
+import qa.search.web.WebSearchApplication;
+import qa.search.web.GoogleApplication;
+import qa.search.web.BingApplication;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,6 +12,7 @@ public class ApplicationHelper {
     public static boolean SHOW_DEBUG = Boolean.parseBoolean(Settings.get("SHOW_DEBUG_INFO"));
     public static boolean SHOW_ERROR = Boolean.parseBoolean(Settings.get("SHOW_ERROR"));
     public static boolean QUERY_REFORMULATION = Boolean.parseBoolean(Settings.get("QUERY_REFORMULATION"));
+    private static WebSearchApplication webSearchApp;
 
     public static void printDebug(String debugString) {
         if (SHOW_DEBUG) {
@@ -48,4 +53,16 @@ public class ApplicationHelper {
         }
 
         return result;
-    }}
+    }
+
+    public static WebSearchApplication getWebSearchApplication() {
+        String searchEngine = Settings.get("SEARCH_ENGINE");
+        if (searchEngine.toLowerCase().equals("google")) {
+            webSearchApp = new GoogleApplication();
+        } else if (searchEngine.toLowerCase().equals("bing")) {
+            webSearchApp = new BingApplication();
+        }
+
+        return webSearchApp;
+    }
+}
