@@ -7,7 +7,7 @@ import org.jsoup.select.Elements;
 
 public class GoogleApplication extends WebSearchApplication {
     public GoogleApplication() {
-        super("http://www.google.com/search?tbs=cdr:1,cd_max:2000&q=", "&start=10", "Google");
+        super("Google", "http://www.google.com/search?tbs=cdr:1,cd_max:2000&q=", "&start=10");
     }
 
     @Override
