@@ -98,18 +98,13 @@ public class ClassifierApplication {
 					}
 
 					String subClassified = "";
-					boolean isSubCorrect = false;
-					for (int i = 1; i < classified.size(); i++) {
-						subClassified += String.format("%-15s",
-								classified.get(i));
-						if (classified.get(i).equals(subExpected)) {
-							isSubCorrect = true;
-							break;
-						}
-						if (i == 1) {
-							break;
+					for (int j = 0; j < classified.size(); j++) {
+						if (classified.get(j).contains("_")) {
+							subClassified += classified.get(j) + " ";
 						}
 					}
+
+					boolean isSubCorrect = subClassified.contains(subExpected);
 
 					if (isSubCorrect) {
 						subCorrect++;

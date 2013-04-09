@@ -277,10 +277,15 @@ public class AnswerExtractorImpl implements AnswerExtractor {
             if (!c.contains("_")) {
                 QueryType qt = QueryType.valueOf(c);
                 switch (qt) {
-                    case LOC: // Location
+                    case LOC:
                         types.add("LOCATION");
                         break;
+                    case DESC:
+                        types.add("LOCATION");
+                        types.add("PERSON");
+                        types.add("ORGANIZATION");
                     case HUM:
+                    case ABBR:
                         types.add("PERSON");
                         types.add("ORGANIZATION");
                         break;
@@ -290,29 +295,55 @@ public class AnswerExtractorImpl implements AnswerExtractor {
                         types.add("MONEY");
                         types.add("PERCENT");
                         break;
+                    case ENTY:
                     default:
                         break;
                 }
             } else {
                 QuerySubType qst = QuerySubType.valueOf(c);
                 switch (qst) {
-                    case HUM_ind: // Person
+                    case ABBR_abb:
+                    case ABBR_exp:
+                        types.add("LOCATION");
+                        types.add("ORGANIZATION");
+                        types.add("PERSON");
+                        break;
+                    case DESC_def:
+                    case DESC_desc:
+                    case DESC_manner:
+                    case DESC_reason:
+                        types.add("LOCATION");
+                        types.add("PERSON");
+                        types.add("ORGANIZATION");
+                        break;
                     case HUM_desc:
+                        types.add("PERSON");
+                        types.add("ORGANIZATION");
+                        break;
+                    case HUM_ind:
                     case HUM_title:
                         types.add("PERSON");
                         break;
-                    case HUM_gr: // Organization
+                    case HUM_gr:
                         types.add("ORGANIZATION");
                         break;
-                    case NUM_date: // Time / Date
+                    case LOC_city:
+                    case LOC_country:
+                    case LOC_mount:
+                    case LOC_other:
+                    case LOC_state:
+                        types.add("LOCATION");
+                        break;
+                    case NUM_date:
                     case NUM_period:
                         types.add("TIME");
                         types.add("DATE");
                         break;
-                    case NUM_money: // Money
+                    case NUM_count:
+                    case NUM_money:
                         types.add("MONEY");
                         break;
-                    case NUM_perc: // Percent
+                    case NUM_perc:
                         types.add("PERCENT");
                         break;
                     default:
