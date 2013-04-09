@@ -58,9 +58,6 @@ public class Application {
 	}
 
 	public static void answer(String[] args, List<String> sampleAnswers, boolean color) {
-		// initialize variables to store answers
-		List<ResultInfo> results = new ArrayList<ResultInfo>();
-
 		// use factory pattern to create components so that we can easily
 		// swap their underlying implementations later without changing
 		// this code
@@ -129,8 +126,8 @@ public class Application {
 			}
 
 			// extract ranked answers from relevant passages
-			results.addAll(answerExtractor.extractAnswer(relevantPassages,
-					questionInfo, irQuery));
+			List<ResultInfo> results = answerExtractor.extractAnswer(relevantPassages,
+					questionInfo, irQuery);
 
 			// print out results for this question
 			printResults(questionInfo, sampleAnswer, results, color);
@@ -165,7 +162,7 @@ public class Application {
 
 		System.out.print("R(s):");
 		for (ResultInfo resultInfo : results) {
-			if (color) {
+			if (color && !resultInfo.getSupportingDocumentId().equals("alt")) {
 				System.out.printf(ANSI_RED + "%s"+ANSI_RESET+" [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());				
 			} else {
 				System.out.printf("%s [%s]; ", resultInfo.getAnswer(), resultInfo.getSupportingDocumentId());			
