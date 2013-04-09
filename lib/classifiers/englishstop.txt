@@ -86,7 +86,6 @@ become
 becomes
 becoming
 been
-before
 beforehand
 behind
 being
@@ -130,7 +129,6 @@ contains
 corresponding
 could
 couldn't
-course
 currently
 d
 definitely
@@ -146,13 +144,11 @@ doing
 don't
 done
 down
-downwards
 during
 e
 each
 edu
 eg
-eight
 either
 else
 elsewhere
@@ -173,19 +169,13 @@ exactly
 example
 except
 f
-far
 few
-fifth
-first
-five
 followed
 following
 follows
 for
-former
 formerly
 forth
-four
 from
 further
 furthermore
@@ -201,7 +191,6 @@ going
 gone
 got
 gotten
-greetings
 h
 had
 hadn't
@@ -214,8 +203,6 @@ haven't
 having
 he
 he's
-hello
-help
 hence
 her
 here
@@ -248,7 +235,6 @@ in
 inasmuch
 inc
 indeed
-indicate
 indicated
 indicates
 inner
@@ -311,7 +297,6 @@ must
 my
 myself
 n
-name
 namely
 nd
 near
@@ -322,9 +307,6 @@ needs
 neither
 never
 nevertheless
-new
-next
-nine
 no
 nobody
 non
@@ -334,7 +316,6 @@ nor
 normally
 not
 nothing
-novel
 now
 nowhere
 o
@@ -422,7 +403,6 @@ she
 should
 shouldn't
 since
-six
 so
 some
 somebody
@@ -479,13 +459,11 @@ they'll
 they're
 they've
 think
-third
 this
 thorough
 thoroughly
 those
 though
-three
 through
 throughout
 thru
@@ -501,8 +479,6 @@ tries
 truly
 try
 trying
-twice
-two
 u
 un
 under
@@ -522,7 +498,6 @@ using
 usually
 uucp
 v
-value
 various
 very
 via
@@ -571,7 +546,6 @@ whose
 why
 will
 willing
-wish
 with
 within
 without
@@ -594,4 +568,9 @@ yours
 yourself
 yourselves
 z
-zero
+wikipedia free encyclopedia
+wikipedia
+encyclopedia
+free jump navigation
+free jump
+jump navigation
