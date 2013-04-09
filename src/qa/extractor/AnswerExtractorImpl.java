@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -27,7 +30,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
-import qa.GoogleApplication;
+import qa.search.web.WebSearchApplication;
 import qa.Settings;
 import qa.helper.ChunkerWrapper;
 import qa.model.QuestionInfo;
@@ -44,8 +47,11 @@ public class AnswerExtractorImpl implements AnswerExtractor {
     private IndexWriter iw;
     private StandardAnalyzer sa;
     private Directory dir;
+    private Map<String, String> answerInfo;
+    private WebSearchApplication searchEngine;
 
-    public AnswerExtractorImpl() {
+    public AnswerExtractorImpl(WebSearchApplication searchEngine) {
+        this.searchEngine = searchEngine;
         sa = new StandardAnalyzer(Version.LUCENE_41);
         try {
             dir = new MMapDirectory(new File(Settings.get("ANSWER_INDEX_PATH")));
@@ -56,13 +62,18 @@ public class AnswerExtractorImpl implements AnswerExtractor {
 
     public List<ResultInfo> extractAnswer(List<Passage> passages, 
             QuestionInfo questionInfo,
-            String answerInfo) {
+            String answerQuery) {
+        Map<String, String> answerInfo = new HashMap<String, String>();
         List<ResultInfo> results = new ArrayList<ResultInfo>();
         for (Passage passage : passages) {
+            answerInfo.put(passage.getContent(), passage.getDocumentId());
+        }
+
+        for (Map.Entry<String, String> aInfo : answerInfo.entrySet()) {
             try {
-                String answer = getAnswer(passage.getContent(), questionInfo);
+                String answer = getAnswer(aInfo.getKey(), questionInfo);
                 if (answer.length() > 0) {
-                    results.add(new ResultInfoImpl(answer, passage.getDocumentId()));    
+                    results.add(new ResultInfoImpl(answer, aInfo.getValue()));    
                 }                
             } catch (Exception e) {
                 ApplicationHelper.printError("Answer Extractor: Unable to rank answers", e);
@@ -84,19 +95,19 @@ public class AnswerExtractorImpl implements AnswerExtractor {
     }
 
     private String rankAnswers(List<String> answers, QuestionInfo info) throws Exception {
-        String googleQueryPrefix = getQuestionChunks(info.getRaw());
+        String webQueryPrefix = getQuestionChunks(info.getRaw());
 
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
         iw = new IndexWriter(dir, config);
 
         for (String answer : answers) {
-            String googleResult = GoogleApplication.search(googleQueryPrefix + answer);
-            addIndex(answer, googleResult);
+            String webResult = searchEngine.search(webQueryPrefix + answer);
+            addIndex(answer, webResult);
         }
 
         iw.close();
 
-        return getTopResult(googleQueryPrefix, answers.size());
+        return getTopResult(webQueryPrefix, answers.size());
     }
 
     private String getQuestionChunks(String question) {
@@ -114,31 +125,31 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         while (m.find()) {
             String chunk = m.group();
 
-            boolean isStopWord = false;
-            for (String stopWord : stopWords) {
-                if (chunk.startsWith(stopWord)) {
-                    isStopWord = true;
-                    break;
-                }
-            }
+            // boolean isStopWord = false;
+            // for (String stopWord : stopWords) {
+            //     if (chunk.startsWith(stopWord)) {
+            //         isStopWord = true;
+            //         break;
+            //     }
+            // }
 
-            if (!isStopWord) {
+            // if (!isStopWord) {
                 chunk = chunk.replaceAll("\\[\\w+([^\\]]*)\\]", "$1").trim();
                 if (questionWords.contains(chunk.toLowerCase())) {
                     continue;
                 }
 
                 result += chunk + " ";    
-            }
+            // }
         }
 
         return result;
     }
 
-    private void addIndex(String answer, String googleResult) throws Exception {
+    private void addIndex(String answer, String webResult) throws Exception {
         Document doc = new Document();
         doc.add(new StringField("ID", answer, Field.Store.YES));
-        doc.add(new TextField("TEXT", googleResult, Field.Store.YES));
+        doc.add(new TextField("TEXT", webResult, Field.Store.YES));
 
         iw.addDocument(doc);
     }
@@ -168,8 +179,8 @@ public class AnswerExtractorImpl implements AnswerExtractor {
     private List<String> mapAnswer(List<String> answers, QuestionInfo info) {
         List<String> results = new ArrayList<String>();
         List<String> types = getEntityType(info);
-        if (types.size() > 0) {
-            for (String answer : answers) {
+        for (String answer : answers) {
+            if (types.size() > 0) {
                 for (String type : types) {
                     if (answer.contains("<" + type + ">")) {
                         answer = answer.replace("<" + type + ">", "").replace("</" + type + ">", "").trim();
@@ -178,6 +189,11 @@ public class AnswerExtractorImpl implements AnswerExtractor {
                         }
                     }
                 }
+            } else {
+                answer = answer.replaceAll("<\\w+>", "").replaceAll("</\\w+>", "").trim();
+                if (!results.contains(answer)) {
+                    results.add(answer);
+                }                
             }
         }
 

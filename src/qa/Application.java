@@ -116,7 +116,7 @@ public class Application {
 					questionInfo, irQuery));
 
 			// print out results for this question
-			printResults(question, results);
+			printResults(questionInfo, results);
 		}
 	}
 
@@ -130,8 +130,8 @@ public class Application {
 				.println("Example: java Application \"Where is Milan ?\" \"Who developed the Macintosh computer ?\" ");
 	}
 
-	private static void printResults(String question, List<ResultInfo> results) {
-		System.out.printf("\nQ: \"%s\"\n", question);
+	private static void printResults(QuestionInfo questionInfo, List<ResultInfo> results) {
+		System.out.printf("\nQ: \"%s\" [%s, %s]\n", questionInfo.getRaw(), questionInfo.getQueryType(), questionInfo.getQuerySubType());
 		System.out.print("A(s):");
 		for (ResultInfo resultInfo : results) {
 			System.out.printf("%s / ", resultInfo.getAnswer());
