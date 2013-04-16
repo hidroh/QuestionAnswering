@@ -71,7 +71,7 @@ public class AnswerExtractorImpl implements AnswerExtractor {
 
     public List<ResultInfo> extractAnswer(List<Passage> passages, 
             QuestionInfo questionInfo,
-            String answerQuery) {
+            String irQuery) {
         Map<String, String> answerInfo = new HashMap<String, String>();
         List<ResultInfo> results = new ArrayList<ResultInfo>();
         for (Passage passage : passages) {
@@ -82,7 +82,7 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         }
 
         try {
-            String taggedAnswer = getAnswer(new ArrayList<String>(answerInfo.keySet()), questionInfo);
+            String taggedAnswer = getAnswer(new ArrayList<String>(answerInfo.keySet()), questionInfo, irQuery);
             if (taggedAnswer.length() > 0) {
                 results.add(new ResultInfoImpl(stripTag(taggedAnswer), answerInfo.get(taggedAnswer)));    
             }
@@ -106,66 +106,31 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         return tagged.replaceAll("<\\w+>", "").replaceAll("</\\w+>", "").trim();
     }
 
-    private String getAnswer(List<String> nameEntities, QuestionInfo info) throws Exception {
+    private String getAnswer(List<String> nameEntities, QuestionInfo info, String irQuery) throws Exception {
         List<String> taggedAnswers = mapAnswer(nameEntities, info);
         if (taggedAnswers.size() > 0) {
-            return rankAnswers(taggedAnswers, info);    
+            return rankAnswers(taggedAnswers, irQuery);
         }
         
         return "";
     }
 
-    private String rankAnswers(List<String> taggedAnswers, QuestionInfo info) throws Exception {
-        String webQueryPrefix = getQuestionChunks(info.getRaw());
-
+    private String rankAnswers(List<String> taggedAnswers, String irQuery) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
         iw = new IndexWriter(dir, config);
 
         for (String taggedAnswer : taggedAnswers) {
             String answer = stripTag(taggedAnswer);
-            String webResult = searchEngine.search(webQueryPrefix + answer);
+            if (irQuery.toLowerCase().contains(answer.toLowerCase())) {
+                continue; // do not consider answer that is part of question
+            }
+            String webResult = searchEngine.search(irQuery + " " + answer);
             addIndex(taggedAnswer, webResult);
         }
 
         iw.close();
 
-        return getTopResult(webQueryPrefix, taggedAnswers.size());
-    }
-
-    private String getQuestionChunks(String question) {
-        String result = "";
-        String chunks = ChunkerWrapper.getInstance().chunk(question);
-        
-        Pattern chunkPattern = Pattern.compile("\\[\\w+([^\\]]*)\\]",
-                Pattern.CASE_INSENSITIVE);
-        Matcher m = chunkPattern.matcher(chunks);
-        ArrayList<String> questionWords = new ArrayList<String>(
-                Arrays.asList(new String[] { "how", "what",
-                        "who", "which", "where", "when" }));
-        // ArrayList<String> stopWords = new ArrayList<String>(
-        //         Arrays.asList(new String[] { "[PP", "[SBAR" }));
-        while (m.find()) {
-            String chunk = m.group();
-
-            // boolean isStopWord = false;
-            // for (String stopWord : stopWords) {
-            //     if (chunk.startsWith(stopWord)) {
-            //         isStopWord = true;
-            //         break;
-            //     }
-            // }
-
-            // if (!isStopWord) {
-                chunk = chunk.replaceAll("\\[\\w+([^\\]]*)\\]", "$1").trim();
-                if (questionWords.contains(chunk.toLowerCase())) {
-                    continue;
-                }
-
-                result += chunk + " ";    
-            // }
-        }
-
-        return result;
+        return getTopResult(irQuery, taggedAnswers.size());
     }
 
     private void addIndex(String answer, String webResult) throws Exception {

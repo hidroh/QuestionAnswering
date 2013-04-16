@@ -7,6 +7,9 @@ import qa.search.web.BingApplication;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.StringBuilder;
+import java.util.Arrays;
+import java.util.List;
 
 public class ApplicationHelper {
     public static boolean SHOW_DEBUG = Boolean.parseBoolean(Settings.get("SHOW_DEBUG_INFO"));
@@ -71,4 +74,19 @@ public class ApplicationHelper {
 
         return webSearchApp;
     }
+
+        public static String join(List<String> list, String delim) {
+            StringBuilder sb = new StringBuilder();
+            String loopDelim = "";
+            for(String s : list) {
+                sb.append(loopDelim);
+                sb.append(s);            
+                loopDelim = delim;
+            }
+            return sb.toString();
+        }
+
+        public static String join(String[] list, String delim) {
+            return join(Arrays.asList(list), delim);
+        }
 }
