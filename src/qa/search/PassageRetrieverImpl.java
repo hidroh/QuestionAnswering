@@ -143,7 +143,7 @@ public class PassageRetrieverImpl implements PassageRetriever {
     private String getPassageSentences(Queue<String> passage) {
         String passageString = "";
         for (String sentence : passage) {
-            passageString += sentence;
+            passageString += sentence + " ";
         }
 
         return passageString;

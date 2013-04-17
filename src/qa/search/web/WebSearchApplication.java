@@ -26,7 +26,6 @@ public abstract class WebSearchApplication {
 
     public String search(String query) {
         try {
-            ApplicationHelper.printDebug(String.format("Search %s for \"%s\"\n", searchEngineName, query));
             String result = "";
             query = ApplicationHelper.stripPunctuation(query).trim().replace(" ", "+");
             List<String> queries = new ArrayList<String>();

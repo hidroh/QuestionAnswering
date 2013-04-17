@@ -30,6 +30,12 @@ public interface QuestionInfo {
 
 	String getRaw();
 
+	List<String> getQueryTerms();
+
+	List<String> getExpandedTerms();
+
+	void setExpandedTerms(List<String> expandedTerms);
+
 	String getMultiClassification();
 	void setMultiClassification(String multiClassification);
 }

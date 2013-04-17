@@ -4,6 +4,7 @@ import java.util.List;
 
 import qa.model.enumerator.QuerySubType;
 import qa.model.enumerator.QueryType;
+import qa.helper.ChunkerWrapper;
 
 public class QuestionInfoImpl implements QuestionInfo {
 	private List<QueryTerm> terms;
@@ -11,12 +12,15 @@ public class QuestionInfoImpl implements QuestionInfo {
 	private QuerySubType querySubType;
 	private String raw;
 	private String multiClassification;
+	private List<String> queryTerms;
+	private List<String> expandedTerms;
 	
 	public QuestionInfoImpl(QueryType queryType, QuerySubType querySubType, List<QueryTerm> terms, String raw) {
 		this.terms = terms;
 		this.queryType = queryType;
 		this.querySubType = querySubType;
 		this.raw = raw;
+        queryTerms = ChunkerWrapper.getInstance().getChunks(raw);
 	}
 	
 	@Override
@@ -37,6 +41,21 @@ public class QuestionInfoImpl implements QuestionInfo {
 	@Override
 	public String getRaw() {
 		return raw;
+	}
+
+	@Override
+	public List<String> getQueryTerms() {
+		return queryTerms;
+	}
+
+	@Override
+	public List<String> getExpandedTerms() {
+		return expandedTerms;
+	}
+
+	@Override
+	public void setExpandedTerms(List<String> expandedTerms) {
+		this.expandedTerms = expandedTerms;
 	}
 
 	public String getMultiClassification() {

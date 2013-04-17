@@ -72,28 +72,16 @@ public class AnswerExtractorImpl implements AnswerExtractor {
     public List<ResultInfo> extractAnswer(List<Passage> passages, 
             QuestionInfo questionInfo,
             String irQuery) {
-        Map<String, String> answerInfo = new HashMap<String, String>();
         List<ResultInfo> results = new ArrayList<ResultInfo>();
-        for (Passage passage : passages) {
-            List<String> nameEntities = NeRecognizer.getInstance().getNameEntities(passage.getContent());
-            for (String entity : nameEntities) {
-                answerInfo.put(entity, passage.getDocumentId());
-            }
-        }
+        Map<String, String> answerInfo = getAnswers(passages);
 
         try {
-            String taggedAnswer = getAnswer(new ArrayList<String>(answerInfo.keySet()), questionInfo, irQuery);
-            if (taggedAnswer.length() > 0) {
-                results.add(new ResultInfoImpl(stripTag(taggedAnswer), answerInfo.get(taggedAnswer)));    
+            String answer = rankAnswers(new ArrayList<String>(answerInfo.keySet()), questionInfo);
+            if (answer.length() > 0) {
+                results.add(new ResultInfoImpl(answer, answerInfo.get(answer)));    
             }
 
-            // adding alternative results for reference
-            String alt = "{";
-            for (String alternative : answerInfo.keySet()) {
-                alt += stripTag(alternative) + "; ";
-            }
-            alt += "}";
-            results.add(new ResultInfoImpl(alt, "alt"));    
+            results.add(new ResultInfoImpl(getAlternatives(answerInfo), "alt"));    
 
         } catch (Exception e) {
             ApplicationHelper.printError("Answer Extractor: Unable to rank answers", e);
@@ -102,35 +90,65 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         return results;
     }
 
+    private Map<String, String> getAnswers(List<Passage> passages) {
+        Map<String,String> answerInfo = new HashMap<String, String>();
+        List<ResultInfo> results = new ArrayList<ResultInfo>();
+        for (Passage passage : passages) {
+            List<String> nameEntities = NeRecognizer.getInstance().getNameEntities(passage.getContent());
+            // List<String> nameEntities = new ArrayList<String>();
+            // nameEntities.addAll(ChunkerWrapper.getInstance().getSortedChunksForAnswer(passage.getContent()));
+            for (String entity : nameEntities) {
+                if (!answerInfo.containsKey(stripTag(entity))) {
+                    answerInfo.put(stripTag(entity), passage.getDocumentId());
+                }
+            }
+        }
+
+        ApplicationHelper.printlnDebug(String.format("Possible answers = %s", answerInfo.keySet().toString()));
+        return answerInfo;
+    }
+
+    private String getAlternatives(Map<String, String> answerInfo) {
+    // adding alternative results for reference
+        String alt = "{";
+        alt += ApplicationHelper.join(answerInfo.keySet().toArray(new String[0]), "; ");
+        alt += "}";
+        return alt;
+    }
+
     private String stripTag(String tagged) {
         return tagged.replaceAll("<\\w+>", "").replaceAll("</\\w+>", "").trim();
     }
 
-    private String getAnswer(List<String> nameEntities, QuestionInfo info, String irQuery) throws Exception {
-        List<String> taggedAnswers = mapAnswer(nameEntities, info);
-        if (taggedAnswers.size() > 0) {
-            return rankAnswers(taggedAnswers, irQuery);
+    private String rankAnswers(List<String> answers, QuestionInfo info) throws Exception {
+        if (answers.size() == 0) {
+            return "";
         }
-        
-        return "";
-    }
 
-    private String rankAnswers(List<String> taggedAnswers, String irQuery) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_41, sa);
         iw = new IndexWriter(dir, config);
+        ApplicationHelper.printlnDebug("Search web for: ");
+        
+        // answers.addAll(info.getExpandedTerms());
+        String webQuery = ApplicationHelper.join(info.getQueryTerms(), " ");
 
-        for (String taggedAnswer : taggedAnswers) {
-            String answer = stripTag(taggedAnswer);
-            if (irQuery.toLowerCase().contains(answer.toLowerCase())) {
+        for (String answer : answers) {
+            if (info.getRaw().toLowerCase().contains(answer.toLowerCase())) {
                 continue; // do not consider answer that is part of question
             }
-            String webResult = searchEngine.search(irQuery + " " + answer);
-            addIndex(taggedAnswer, webResult);
+            ApplicationHelper.printlnDebug(String.format("\"%s\"", webQuery + " " + answer));
+            String webResult = searchEngine.search(webQuery + " " + answer);
+            addIndex(answer, webResult);
         }
 
         iw.close();
 
-        return getTopResult(irQuery, taggedAnswers.size());
+        String irQuery = webQuery;
+        if (info.getExpandedTerms() != null) {
+            irQuery += " " + ApplicationHelper.join(info.getExpandedTerms(), " ");
+        }
+        
+        return getTopResult(irQuery, answers.size());
     }
 
     private void addIndex(String answer, String webResult) throws Exception {
@@ -161,162 +179,5 @@ public class AnswerExtractorImpl implements AnswerExtractor {
         }
 
         return "";
-    }
-
-    private List<String> mapAnswer(List<String> answers, QuestionInfo info) {
-        List<String> results = new ArrayList<String>();
-        List<String> types = new ArrayList<String>();
-        if (Integer.parseInt(Settings.get("CLASSIFIER_LIMIT")) == 1) {
-            types.addAll(getEntityType(info));
-        } else {
-            types.addAll(getMultiEntityType(info));
-        }
-
-        for (String answer : answers) {
-            if (types.size() > 0) {
-                for (String type : types) {
-                    if (answer.contains("<" + type + ">")) {
-                        if (!results.contains(answer)) {
-                            results.add(answer);
-                        }
-                    }
-                }
-            } else {
-                if (!results.contains(answer)) {
-                    results.add(answer);
-                }                
-            }
-        }
-
-        return results;
-    }
-
-    private List<String> getEntityType(QuestionInfo info) {
-        List<String> types = new ArrayList<String>();
-        switch (info.getQueryType()) {
-            case LOC: // Location
-                types.add("LOCATION");
-                break;
-            case HUM:
-                switch (info.getQuerySubType()) {
-                    case HUM_ind: // Person
-                    case HUM_desc:
-                    case HUM_title:
-                        types.add("PERSON");
-                        break;
-                    case HUM_gr: // Organization
-                        types.add("ORGANIZATION");
-                        break;
-					default:
-						break;
-                }
-                break;
-            case NUM:
-                switch (info.getQuerySubType()) {
-                    case NUM_date: // Time / Date
-                    case NUM_period:
-                        types.add("TIME");
-                        types.add("DATE");
-                        break;
-                    case NUM_money: // Money
-                        types.add("MONEY");
-                        break;
-                    case NUM_perc: // Percent
-                        types.add("PERCENT");
-                        break;
-					default:
-						break;
-                }
-                break;
-			default:
-				break;
-        }
-
-        return types;
-    }
-
-    private List<String> getMultiEntityType(QuestionInfo info) {
-        String[] classified = info.getMultiClassification().split(" ");
-        Set<String> types = new HashSet<String>();
-        for (String c : classified) {
-            if (!c.contains("_")) {
-                QueryType qt = QueryType.valueOf(c);
-                switch (qt) {
-                    case LOC:
-                        types.add("LOCATION");
-                        break;
-                    case DESC:
-                        types.add("LOCATION");
-                        types.add("PERSON");
-                        types.add("ORGANIZATION");
-                    case HUM:
-                    case ABBR:
-                        types.add("PERSON");
-                        types.add("ORGANIZATION");
-                        break;
-                    case NUM:
-                        types.add("TIME");
-                        types.add("DATE");
-                        types.add("MONEY");
-                        types.add("PERCENT");
-                        break;
-                    case ENTY:
-                    default:
-                        break;
-                }
-            } else {
-                QuerySubType qst = QuerySubType.valueOf(c);
-                switch (qst) {
-                    case ABBR_abb:
-                    case ABBR_exp:
-                        types.add("LOCATION");
-                        types.add("ORGANIZATION");
-                        types.add("PERSON");
-                        break;
-                    case DESC_def:
-                    case DESC_desc:
-                    case DESC_manner:
-                    case DESC_reason:
-                        types.add("LOCATION");
-                        types.add("PERSON");
-                        types.add("ORGANIZATION");
-                        break;
-                    case HUM_desc:
-                        types.add("PERSON");
-                        types.add("ORGANIZATION");
-                        break;
-                    case HUM_ind:
-                    case HUM_title:
-                        types.add("PERSON");
-                        break;
-                    case HUM_gr:
-                        types.add("ORGANIZATION");
-                        break;
-                    case LOC_city:
-                    case LOC_country:
-                    case LOC_mount:
-                    case LOC_other:
-                    case LOC_state:
-                        types.add("LOCATION");
-                        break;
-                    case NUM_date:
-                    case NUM_period:
-                        types.add("TIME");
-                        types.add("DATE");
-                        break;
-                    case NUM_count:
-                    case NUM_money:
-                        types.add("MONEY");
-                        break;
-                    case NUM_perc:
-                        types.add("PERCENT");
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        return new ArrayList<String>(types);
     }
 }

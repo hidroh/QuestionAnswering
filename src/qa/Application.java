@@ -98,22 +98,22 @@ public class Application {
 			if (sampleAnswers != null) {
 				sampleAnswer = sampleAnswers.get(i);
 			}
-
+ApplicationHelper.printlnDebug("\nClassifying...");
 			// parse question to get expanded query and query type
 			QuestionInfo questionInfo = questionParser.parse(question);
-
+ApplicationHelper.printlnDebug("\nFormulating...");
 			// use search engine to reformulate original query
 			String irQuery = ApplicationHelper.stripPunctuation(questionInfo.getRaw());
 			if (ApplicationHelper.QUERY_REFORMULATION) {
 				irQuery = searchEngine.search(questionInfo);
 			}
-
+ApplicationHelper.printlnDebug("\nRetrieving documents...");
 			// get set of relevant documents based on reformulated query
 			List<Document> relevantDocs = new ArrayList<Document>();
 			if (documentIndexer.hasIndexData(Settings.get("INDEX_PATH"))) {
 				relevantDocs = documentRetriever.getDocuments(irQuery);
 			}
-
+ApplicationHelper.printlnDebug("\nRetrieving passages...");
 			// from this set of document, narrow down result set by
 			// filtering
 			// only passages that possibly contain answer type
@@ -124,7 +124,7 @@ public class Application {
 
 				relevantPassages.addAll(passageRetriever.getPassages(irQuery));
 			}
-
+ApplicationHelper.printlnDebug("\nExtracting answers...");
 			// extract ranked answers from relevant passages
 			List<ResultInfo> results = answerExtractor.extractAnswer(relevantPassages,
 					questionInfo, irQuery);
